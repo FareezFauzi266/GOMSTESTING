@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Maintenance Schedules</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Maintenance Schedules</h1>
+    <button class="btn" onclick="openModal('modal-createSchedule')">+ Create Schedule</button>
+    <table id="scheduleTable">
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Created By</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Create Modal -->
+  <div class="modal hidden" id="modal-createSchedule">
+    <div class="modal-content">
+      <h2>Create Schedule</h2>
+      <input type="text" id="newName" placeholder="Schedule Name">
+      <textarea id="newDesc" placeholder="Description"></textarea>
+      <input type="text" id="newBy" placeholder="Created By">
+      <button onclick="createSchedule()">Create</button>
+      <button class="btn-secondary" onclick="closeModal('modal-createSchedule')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal hidden" id="modal-editSchedule">
+    <div class="modal-content">
+      <h2>Edit Schedule</h2>
+      <input type="text" id="editName" placeholder="Schedule Name">
+      <textarea id="editDesc" placeholder="Description"></textarea>
+      <button onclick="saveEdit()">Save</button>
+      <button class="btn-secondary" onclick="closeModal('modal-editSchedule')">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const tbody = document.querySelector("tbody");
+    let schedules = JSON.parse(localStorage.getItem("schedules") || "[]");
+    let editIndex = null;
+
+    function render() {
+      tbody.innerHTML = "";
+      schedules.forEach((s, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${s.name}</td>
+            <td>${s.description}</td>
+            <td>${s.createdBy}</td>
+            <td>
+              <a class="btn" href="maintenanceRoutine.html?scheduleId=${s.id}">View</a>
+              <button class="btn-secondary" onclick="openEdit(${i})">Edit</button>
+              <button class="btn-danger" onclick="openDelete(${i})">Delete</button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.remove("hidden");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add("hidden");
+    }
+
+    function createSchedule() {
+      const name = document.getElementById("newName").value;
+      const desc = document.getElementById("newDesc").value;
+      const by = document.getElementById("newBy").value;
+      if (!name || !desc || !by) return;
+      schedules.push({ id: "sch-" + Date.now(), name, description: desc, createdBy: by, items: [] });
+      save();
+      closeModal("modal-createSchedule");
+      render();
+    }
+
+    function openEdit(i) {
+      editIndex = i;
+      const s = schedules[i];
+      document.getElementById("editName").value = s.name;
+      document.getElementById("editDesc").value = s.description;
+      openModal("modal-editSchedule");
+    }
+
+    function saveEdit() {
+      const s = schedules[editIndex];
+      s.name = document.getElementById("editName").value;
+      s.description = document.getElementById("editDesc").value;
+      save();
+      closeModal("modal-editSchedule");
+      render();
+    }
+
+    function openDelete(i) {
+      const modal = document.createElement("div");
+      modal.className = "modal";
+      modal.innerHTML = `
+        <div class="modal-content">
+          <h2>Confirm Delete</h2>
+          <p>Are you sure you want to delete schedule <strong>${schedules[i].name}</strong>?</p>
+          <button class="btn-danger" onclick="confirmDelete(${i})">Yes, Delete</button>
+          <button class="btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function confirmDelete(i) {
+      schedules.splice(i, 1);
+      save();
+      document.querySelectorAll('.modal').forEach(m => m.remove());
+      render();
+    }
+
+    function save() {
+      localStorage.setItem("schedules", JSON.stringify(schedules));
+    }
+
+    render();
+  </script>
+</body>
+</html>
