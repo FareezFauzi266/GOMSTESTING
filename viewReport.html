@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>View Maintenance Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      width: 900px;
+      margin: 30px auto;
+      border: 1px solid #2c4c76;
+      padding: 20px;
+      display: flex;
+      gap: 30px;
+    }
+    .left-panel {
+      flex: 1;
+    }
+    .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h2 {
+      color: #2c4c76;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      display: flex;
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      width: 130px;
+      font-weight: bold;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      flex: 1;
+      padding: 5px;
+    }
+    .form-group textarea {
+      resize: vertical;
+    }
+    .image-viewer {
+      width: 100%;
+      max-width: 320px;
+      height: 250px;
+      border: 1px solid #2c4c76;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .image-viewer img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+    }
+    .nav-left {
+      left: 10px;
+    }
+    .nav-right {
+      right: 10px;
+    }
+    .button-group {
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .button-group button {
+      padding: 8px 16px;
+    }
+  </style>
+</head>
+<body>
+
+<h2 style="text-align:center;">View Report</h2>
+<div class="container">
+  <!-- Left: Report Details -->
+  <div class="left-panel">
+    <h3>Maintenance Report</h3>
+    
+    <div class="form-group">
+      <label for="recordId">Record ID:</label>
+      <input type="text" id="recordId" name="recordId" >
+    </div>
+
+    <div class="form-group">
+      <label for="itemCode">Item Code:</label>
+      <input type="text" id="itemCode" name="itemCode" >
+    </div>
+
+    <div class="form-group">
+      <label for="date">Date:</label>
+      <input type="text" id="date" name="date" >
+    </div>
+
+    <div class="form-group">
+      <label for="userId">User ID:</label>
+      <input type="text" id="userId" name="userId" >
+    </div>
+
+    <div class="form-group">
+      <label for="condition">Item Condition:</label>
+      <select id="condition" >
+        <option selected>2 - Need Maintenance</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="remarks">* Remarks:</label>
+      <textarea id="remarks" name="remarks" rows="4" ></textarea>
+    </div>
+  </div>
+
+  <!-- Right: Image Viewer -->
+  <div class="right-panel">
+    <label><strong>Attachment (copy):</strong></label>
+    <div class="image-viewer">
+      <span class="nav-arrow nav-left">&#10094;</span>
+      <img src="https://via.placeholder.com/200x150?text=Front+Image" alt="Attachment Image">
+      <span class="nav-arrow nav-right">&#10095;</span>
+    </div>
+    
+    <div class="button-group">
+      <button onclick="history.back()">Back</button>
+      <button>Print</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

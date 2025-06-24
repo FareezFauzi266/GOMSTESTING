@@ -8,7 +8,7 @@
       font-family: Arial, sans-serif;
     }
     .container {
-      width: 600px;
+      width: 700px;
       margin: 30px auto;
       border: 1px solid #2c4c76;
       padding: 20px;
@@ -32,17 +32,21 @@
       flex: 1;
       padding: 5px;
     }
-    .form-group select {
-      width: 150px;
+
+    .form-two-column {
+      display: flex;
+      gap: 20px;
     }
-    .form-note {
-      margin-left: 150px;
-      font-size: 0.9em;
-      color: #2c4c76;
+
+    .left-column, .right-column {
+      flex: 1;
     }
+
     .button-group {
       text-align: right;
+      margin-top: 20px;
     }
+
     .button-group button {
       padding: 6px 12px;
       margin-left: 10px;
@@ -54,6 +58,7 @@
 <div class="container">
   <h2>Perform Maintenance</h2>
   <form>
+    <!-- Top section: full width -->
     <div class="form-group">
       <label for="recordId">Record ID:</label>
       <input type="text" id="recordId" name="recordId">
@@ -69,30 +74,36 @@
       <input type="date" id="date" name="date">
     </div>
 
-    <div class="form-group">
-      <label for="userId">User ID:</label>
-      <input type="text" id="userId" name="userId">
+    <!-- Two-column section starts here -->
+    <div class="form-two-column">
+      <div class="right-column">
+        <div class="form-group">
+          <label for="userId">User ID:</label>
+          <input type="text" id="userId" name="userId">
+        </div>
+
+        <div class="form-group">
+          <label for="itemCondition">* Item Condition:</label>
+          <select id="itemCondition" name="itemCondition" required>
+            <option value="">Select...</option>
+            <option value="1">1 - Good</option>
+            <option value="2">2 - Need Maintenance</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="remarks">* Remarks:</label>
+          <textarea id="remarks" name="remarks" rows="4" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="attachment">Attachment:</label>
+          <input type="file" id="attachment" name="attachment">
+        </div>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="itemCondition">* Item Condition:</label>
-      <select id="itemCondition" name="itemCondition" required>
-        <option value="">Select...</option>
-        <option value="1">1 - Good</option>
-        <option value="2">2 - Need Maintenance</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label for="remarks">* Remarks:</label>
-      <textarea id="remarks" name="remarks" rows="4" required></textarea>
-    </div>
-
-    <div class="form-group">
-      <label for="attachment">Attachment (copy):</label>
-      <input type="file" id="attachment" name="attachment">
-    </div>
-
+    <!-- Buttons -->
     <div class="button-group">
       <button type="reset">Cancel</button>
       <button type="submit">Upload</button>
