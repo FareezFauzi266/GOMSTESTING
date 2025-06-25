@@ -119,9 +119,16 @@
         <label for="itemCode">Item Code</label>
         <select id="itemCode" onchange="autoFillName()">
           <option value="">-- Select --</option>
-          <option value="A01">A01 - Mineral Water</option>
-          <option value="B02">B02 - Protein Shake</option>
-          <option value="C03">C03 - Energy Bar</option>
+          <option value="A001">A001 - Mineral Water</option>
+		  <option value="A002">A002 - Protein Shake</option>
+		  <option value="A003">A003 - Energy Bar</option>
+		  <option value="A004">A004 - Whey Protein Sachet</option>
+		  <option value="A005">A005 - Isotonic Drink</option>
+		  <option value="A006">A006 - Vitamin Water</option>
+		  <option value="A007">A007 - Granola Bar</option>
+		  <option value="A008">A008 - Gym Towel</option>
+		  <option value="A009">A009 - Shaker Bottle</option>
+		  <option value="A010">A010 - Weightlifting Gloves</option>
         </select>
       </div>
 
@@ -185,9 +192,16 @@
 
 <script>
   const itemData = {
-    "A01": { name: "Mineral Water", price: 1.50 },
-    "B02": { name: "Protein Shake", price: 7.00 },
-    "C03": { name: "Energy Bar", price: 2.50 }
+    "A001": { name: "Mineral Water", price: 1.50 },
+	"A002": { name: "Protein Shake", price: 8.00 },
+	"A003": { name: "Energy Bar", price: 3.00 },
+	"A004": { name: "Whey Protein Sachet", price: 9.50 },
+	"A005": { name: "Isotonic Drink", price: 4.50 },
+	"A006": { name: "Vitamin Water", price: 3.80 },
+	"A007": { name: "Granola Bar", price: 2.80 },
+	"A008": { name: "Gym Towel", price: 15.00 },
+	"A009": { name: "Shaker Bottle", price: 12.00 },
+	"A010": { name: "Weightlifting Gloves", price: 25.00 }
   };
 
   // Reverse lookup for item name → code (case-insensitive)
@@ -290,5 +304,3 @@
 
 </body>
 </html>
-
-log payment
