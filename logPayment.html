@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Log Payment</title>
+  <style>
+    body {
+      font-family: "Comic Sans MS", cursive;
+      background-color: white;
+      padding: 20px;
+    }
+
+    .outer-container {
+      border: 2px solid #003366;
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .top-section {
+      display: flex;
+      gap: 30px;
+    }
+
+    .form-box {
+      border: 2px solid #003366;
+      padding: 15px;
+      width: 360px;
+      height: fit-content;
+    }
+
+    .form-row {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+    }
+
+    .form-row label {
+      width: 100px;
+    }
+
+    input, select {
+      padding: 4px;
+      flex: 1;
+    }
+
+    .or-label {
+      text-align: center;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #003366;
+    }
+
+    #addBtn {
+      margin-left: 10px;
+      padding: 4px 10px;
+    }
+
+    .table-area {
+      flex: 1;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+    }
+
+    th, td {
+      border: 1px solid #003366;
+      padding: 6px;
+      text-align: center;
+    }
+
+    .delete-btn {
+      cursor: pointer;
+      color: red;
+      font-weight: bold;
+    }
+
+    .payment-discount {
+      margin-top: 30px;
+    }
+
+    .payment-method label {
+      margin-right: 20px;
+    }
+
+    .totals {
+      text-align: right;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .confirm-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      display: block;
+      margin-left: auto;
+    }
+
+    .undo-btn {
+      margin-left: 10px;
+      padding: 4px 10px;
+      background-color: #f4f4f4;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="outer-container">
+  <h2>Log Payment</h2>
+
+  <div class="top-section">
+    <div class="form-box">
+      <div class="form-row">
+        <label for="itemCode">Item Code</label>
+        <select id="itemCode" onchange="autoFillName()">
+          <option value="">-- Select --</option>
+          <option value="A01">A01 - Mineral Water</option>
+          <option value="B02">B02 - Protein Shake</option>
+          <option value="C03">C03 - Energy Bar</option>
+        </select>
+      </div>
+
+      <div class="or-label">or</div>
+
+      <div class="form-row">
+        <label for="itemName">Item Name</label>
+        <input type="text" id="itemName" oninput="autoFillCode()">
+      </div>
+
+      <div class="form-row">
+        <label for="itemQty">Quantity</label>
+        <input type="number" id="itemQty" min="1">
+        <button id="addBtn" onclick="addItem()">Add</button>
+      </div>
+    </div>
+
+    <div class="table-area">
+      <table id="itemTable">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Name</th>
+            <th>Qty</th>
+            <th>P.P.U</th>
+            <th>Price (RM)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Items will appear here -->
+        </tbody>
+      </table>
+
+      <div class="totals">
+        <p>Discount: <span id="discountValue">RM 0.00</span></p>
+        <p><strong>Total: <span id="totalValue">RM 0.00</span></strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Section: Payment + Discount -->
+  <div class="payment-discount">
+    <div class="payment-method">
+      <p><strong>Payment Method:</strong></p>
+      <label><input type="radio" name="payment" value="Card"> Card</label>
+      <label><input type="radio" name="payment" value="QR"> QR</label>
+      <label><input type="radio" name="payment" value="Cash"> Cash</label>
+    </div>
+
+    <div class="discount-section" style="margin-top:10px;">
+      <label>Discount (%)</label>
+      <input type="number" id="discountInput" min="0" max="100">
+      <button onclick="applyDiscount()">Add Discount</button>
+      <button class="undo-btn" id="undoBtn" onclick="undoDiscount()" style="display:none;">Undo</button>
+    </div>
+  </div>
+
+  <button class="confirm-btn" onclick="confirmPayment()">Confirm</button>
+</div>
+
+<script>
+  const itemData = {
+    "A01": { name: "Mineral Water", price: 1.50 },
+    "B02": { name: "Protein Shake", price: 7.00 },
+    "C03": { name: "Energy Bar", price: 2.50 }
+  };
+
+  // Reverse lookup for item name → code (case-insensitive)
+  const nameToCode = {};
+  Object.entries(itemData).forEach(([code, data]) => {
+    nameToCode[data.name.toLowerCase()] = code;
+  });
+
+  let items = [];
+  let discountPercent = 0;
+
+  function autoFillName() {
+    const code = document.getElementById('itemCode').value;
+    const nameInput = document.getElementById('itemName');
+    if (itemData[code]) {
+      nameInput.value = itemData[code].name;
+    } else {
+      nameInput.value = '';
+    }
+  }
+
+  function autoFillCode() {
+    const name = document.getElementById('itemName').value.trim().toLowerCase();
+    const codeInput = document.getElementById('itemCode');
+    if (nameToCode[name]) {
+      codeInput.value = nameToCode[name];
+    } else {
+      codeInput.value = '';
+    }
+  }
+
+  function addItem() {
+    const code = document.getElementById('itemCode').value;
+    const qty = parseInt(document.getElementById('itemQty').value);
+    if (!code || isNaN(qty) || qty <= 0) return;
+
+    const item = itemData[code];
+    items.push({ name: item.name, qty, pricePerUnit: item.price });
+
+    // Clear form
+    document.getElementById('itemCode').value = '';
+    document.getElementById('itemName').value = '';
+    document.getElementById('itemQty').value = '';
+
+    updateTable();
+  }
+
+  function deleteItem(index) {
+    items.splice(index, 1);
+    updateTable();
+  }
+
+  function applyDiscount() {
+    const input = parseFloat(document.getElementById('discountInput').value);
+    if (!isNaN(input) && input >= 0 && input <= 100) {
+      discountPercent = input;
+      document.getElementById('undoBtn').style.display = 'inline-block';
+      updateTable();
+    }
+  }
+
+  function undoDiscount() {
+    discountPercent = 0;
+    document.getElementById('discountInput').value = '';
+    document.getElementById('undoBtn').style.display = 'none';
+    updateTable();
+  }
+
+  function updateTable() {
+    const tbody = document.querySelector('#itemTable tbody');
+    tbody.innerHTML = '';
+    let total = 0;
+
+    items.forEach((item, index) => {
+      const price = item.qty * item.pricePerUnit;
+      total += price;
+
+      const row = `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.name}</td>
+          <td>${item.qty}</td>
+          <td>${item.pricePerUnit.toFixed(2)}</td>
+          <td>${price.toFixed(2)}</td>
+          <td><span class="delete-btn" onclick="deleteItem(${index})">🗑️</span></td>
+        </tr>`;
+      tbody.innerHTML += row;
+    });
+
+    const discountAmount = total * (discountPercent / 100);
+    document.getElementById('discountValue').textContent = `RM ${discountAmount.toFixed(2)}`;
+    document.getElementById('totalValue').textContent = `RM ${(total - discountAmount).toFixed(2)}`;
+  }
+
+  function confirmPayment() {
+    alert("Payment confirmed!");
+    location.reload(); // Reset all
+  }
+</script>
+
+</body>
+</html>
