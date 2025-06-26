@@ -170,8 +170,7 @@
                 <option value="">Select Frequency</option>
                 <option value="1">Daily</option>
                 <option value="7">Weekly</option>
-                <option value="14">Bi-weekly</option>
-              </select>
+                <option value="14">Bi-weekly</option></select>
             </div>
           </div>
           <div class="modal-footer">
