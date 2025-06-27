@@ -3,28 +3,33 @@
 <head>
   <!--testt-->
   <meta charset="UTF-8">
-  <title>Perform Maintenance Interface</title>
+  <title>Perform Maintenance</title>
   <style>
     body {
       font-family: Arial, sans-serif;
     }
     .container {
-      width: 700px;
+      width: 900px;
       margin: 30px auto;
       border: 1px solid #2c4c76;
       padding: 20px;
+      display: flex;
+      gap: 30px;
+    }
+    .left-panel, .right-panel {
+      flex: 1;
     }
     h2 {
       color: #2c4c76;
-      text-align: center;
       margin-bottom: 20px;
+      text-align: center;
     }
     .form-group {
       display: flex;
       margin-bottom: 15px;
     }
     .form-group label {
-      width: 150px;
+      width: 130px;
       font-weight: bold;
     }
     .form-group input,
@@ -33,84 +38,78 @@
       flex: 1;
       padding: 5px;
     }
-
-    .form-two-column {
-      display: flex;
-      gap: 20px;
+    .form-group textarea {
+      resize: vertical;
     }
-
-    .left-column, .right-column {
-      flex: 1;
-    }
-
     .button-group {
-      text-align: right;
       margin-top: 20px;
+      text-align: right;
     }
-
     .button-group button {
-      padding: 6px 12px;
+      padding: 8px 16px;
       margin-left: 10px;
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h2>Perform Maintenance</h2>
-  <form>
-    <!-- Top section: full width -->
-    <div class="form-group">
-      <label for="recordId">Record ID:</label>
-      <input type="text" id="recordId" name="recordId">
-    </div>
+<h2>Perform Maintenance</h2>
 
-    <div class="form-group">
-      <label for="itemCode">Item Code:</label>
-      <input type="text" id="itemCode" name="itemCode">
-    </div>
+<form>
+  <div class="container">
+    <!-- Left Column -->
+    <div class="left-panel">
+    <h3>Maintenance Report</h3>
+      <div class="form-group">
+        <label for="recordId">Record ID:</label>
+        <input type="text" id="recordId" name="recordId">
+      </div>
 
-    <div class="form-group">
-      <label for="date">Date:</label>
-      <input type="date" id="date" name="date">
-    </div>
+      <div class="form-group">
+        <label for="itemCode">Item Code:</label>
+        <input type="text" id="itemCode" name="itemCode">
+      </div>
 
-    <!-- Two-column section starts here -->
-    <div class="form-two-column">
-      <div class="right-column">
-        <div class="form-group">
-          <label for="userId">User ID:</label>
-          <input type="text" id="userId" name="userId">
-        </div>
-
-        <div class="form-group">
-          <label for="itemCondition">* Item Condition:</label>
-          <select id="itemCondition" name="itemCondition" required>
-            <option value="">Select...</option>
-            <option value="1">1 - Good</option>
-            <option value="2">2 - Need Maintenance</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="remarks">* Remarks:</label>
-          <textarea id="remarks" name="remarks" rows="4" required></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="attachment">Attachment:</label>
-          <input type="file" id="attachment" name="attachment">
-        </div>
+      <div class="form-group">
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date">
       </div>
     </div>
 
-    <!-- Buttons -->
-    <div class="button-group">
-      <button type="reset">Cancel</button>
-      <button type="submit">Upload</button>
+    <!-- Right Column -->
+    <div class="right-panel">
+    <h3></h3>
+      <div class="form-group">
+        <label for="userId">User ID:</label>
+        <input type="text" id="userId" name="userId">
+      </div>
+
+      <div class="form-group">
+        <label for="condition">* Item Condition:</label>
+        <select id="condition" name="condition" required>
+          <option value="">Select...</option>
+          <option value="1">1 - Good</option>
+          <option value="2">2 - Need Maintenance</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="remarks">* Remarks:</label>
+        <textarea id="remarks" name="remarks" rows="4" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="attachment">Attachment (copy):</label>
+        <input type="file" id="attachment" name="attachment">
+      </div>
+
+      <div class="button-group">
+        <button type="reset">Cancel</button>
+        <button type="submit">Upload</button>
+      </div>
     </div>
-  </form>
-</div>
+  </div>
+</form>
 
 </body>
 </html>

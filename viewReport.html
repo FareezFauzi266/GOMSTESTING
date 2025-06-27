@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>View Maintenance Report</title>
+  <title>View Report</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,7 +13,9 @@
       border: 1px solid #2c4c76;
       padding: 20px;
       display: flex;
+      justify-content: space-between;
       gap: 30px;
+      position: relative;
     }
     .left-panel {
       flex: 1;
@@ -23,10 +25,12 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: space-between;
     }
     h2 {
       color: #2c4c76;
       margin-bottom: 20px;
+      text-align: center;
     }
     .form-group {
       display: flex;
@@ -54,6 +58,7 @@
       justify-content: center;
       align-items: center;
       position: relative;
+      margin-bottom: auto;
     }
     .image-viewer img {
       max-width: 100%;
@@ -74,66 +79,68 @@
       right: 10px;
     }
     .button-group {
-      margin-top: 30px;
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
+      margin-top: 20px;
+      align-self: flex-end;
     }
     .button-group button {
       padding: 8px 16px;
+      margin-left: 10px;
     }
   </style>
 </head>
 <body>
 
-<h2 style="text-align:center;">View Report</h2>
+<h2>Perform Report</h2>
 <div class="container">
   <!-- Left: Report Details -->
   <div class="left-panel">
-    <h3>Maintenance Report</h3>
+    <h3>Perform Report</h3>
     
     <div class="form-group">
       <label for="recordId">Record ID:</label>
-      <input type="text" id="recordId" name="recordId" >
+      <input type="text" id="recordId" name="recordId">
     </div>
 
     <div class="form-group">
       <label for="itemCode">Item Code:</label>
-      <input type="text" id="itemCode" name="itemCode" >
+      <input type="text" id="itemCode" name="itemCode">
     </div>
 
     <div class="form-group">
       <label for="date">Date:</label>
-      <input type="text" id="date" name="date" >
+      <input type="text" id="date" name="date">
     </div>
 
     <div class="form-group">
       <label for="userId">User ID:</label>
-      <input type="text" id="userId" name="userId" >
+      <input type="text" id="userId" name="userId">
     </div>
 
     <div class="form-group">
       <label for="condition">Item Condition:</label>
-      <select id="condition" >
+      <select id="condition">
         <option selected>2 - Need Maintenance</option>
       </select>
     </div>
 
     <div class="form-group">
       <label for="remarks">* Remarks:</label>
-      <textarea id="remarks" name="remarks" rows="4" ></textarea>
+      <textarea id="remarks" name="remarks" rows="4"></textarea>
     </div>
   </div>
 
-  <!-- Right: Image Viewer -->
+  <!-- Right: Attachment + Buttons -->
   <div class="right-panel">
-    <label><strong>Attachment (copy):</strong></label>
-    <div class="image-viewer">
-      <span class="nav-arrow nav-left">&#10094;</span>
-      <img src="https://via.placeholder.com/200x150?text=Front+Image" alt="Attachment Image">
-      <span class="nav-arrow nav-right">&#10095;</span>
+    <h3></h3>
+    <div style="width: 100%;">
+      <label><strong>Attachment (copy):</strong></label>
+      <div class="image-viewer">
+        <span class="nav-arrow nav-left">&#10094;</span>
+        <img src="https://via.placeholder.com/200x150?text=Front+Image" alt="Attachment Image">
+        <span class="nav-arrow nav-right">&#10095;</span>
+      </div>
     </div>
-    
+
     <div class="button-group">
       <button onclick="history.back()">Back</button>
       <button>Print</button>
