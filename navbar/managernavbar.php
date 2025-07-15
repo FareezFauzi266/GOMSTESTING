@@ -1,69 +1,87 @@
 <!-- Navbar -->
-      <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-        <!-- Left navbar links -->
-        <ul class="navbar-nav">
-          <li class="nav-item">
+<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+        <li class="nav-item">
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-          </li>
-          <!--<li class="nav-item d-none d-sm-inline-block">
-            <a href="../../index3.html" class="nav-link">Home</a>
-          </li>
-          <li class="nav-item d-none d-sm-inline-block">
-            <a href="#" class="nav-link">Contact</a>
-          </li>-->
-        </ul>
+        </li>
+    </ul>
 
-        <!-- Right navbar links -->
-        <ul class="navbar-nav ml-auto">
-          <!-- Navbar Search -->
-          <li class="nav-item">
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+        <!-- Navbar Search -->
+        <li class="nav-item">
             <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-              <i class="fas fa-search"></i>
+                <i class="fas fa-search"></i>
             </a>
             <div class="navbar-search-block">
-              <form class="form-inline">
-                <div class="input-group input-group-sm">
-                  <input
-                    class="form-control form-control-navbar"
-                    type="search"
-                    placeholder="Search"
-                    aria-label="Search"
-                  />
-                  <div class="input-group-append">
-                    <button class="btn btn-navbar" type="submit">
-                      <i class="fas fa-search"></i>
-                    </button>
-                    <button
-                      class="btn btn-navbar"
-                      type="button"
-                      data-widget="navbar-search"
-                    >
-                      <i class="fas fa-times"></i>
-                    </button>
-                  </div>
-                </div>
-              </form>
+                <form class="form-inline">
+                    <div class="input-group input-group-sm">
+                        <input
+                            class="form-control form-control-navbar"
+                            type="search"
+                            placeholder="Search"
+                            aria-label="Search"
+                        />
+                        <div class="input-group-append">
+                            <button class="btn btn-navbar" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button
+                                class="btn btn-navbar"
+                                type="button"
+                                data-widget="navbar-search"
+                            >
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-          </li>
+        </li>
 
-          <!-- Profile Dropdown (on the right) -->
-          <li class="nav-item dropdown">
+        <!-- Profile Dropdown (on the right) -->
+        <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
-              <i class="fas fa-user-circle"></i>
+                <i class="fas fa-user-circle"></i>
             </a>
             <div class="dropdown-menu dropdown-menu-right">
-              <a href="#" class="dropdown-item">
-                <i class="fas fa-user mr-2"></i> Profile
-              </a>
-              <a href="#" class="dropdown-item">
-                <i class="fas fa-cog mr-2"></i> Settings
-              </a>
-              <div class="dropdown-divider"></div>
-              <a href="#" class="dropdown-item" onclick="return false;">
-                <i class="fas fa-sign-out-alt mr-2"></i> Logout
-              </a>
+                <a href="#" class="dropdown-item">
+                    <i class="fas fa-user mr-2"></i> Profile
+                </a>
+                <a href="#" class="dropdown-item">
+                    <i class="fas fa-cog mr-2"></i> Settings
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </a>
             </div>
-          </li>
-        </ul>
-      </nav>
-      <!-- /.navbar -->
+        </li>
+    </ul>
+</nav>
+<!-- /.navbar -->
+
+<!-- SweetAlert for Logout Confirmation -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.getElementById('logoutBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You will be logged out of the system.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, logout!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Redirect to root index.php after confirmation
+            window.location.href = '../index.php';
+        }
+    });
+});
+</script>

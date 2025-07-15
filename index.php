@@ -2,11 +2,12 @@
 <html lang="en"> 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Gym Operational Management System (GOMS)</title>
+    <title>GOMS</title>
     <link rel="icon" href="#">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.2.min.js"></script>
     <style>
         body.login-page {
@@ -24,8 +25,8 @@
         
         .login-logo {
             text-align: center;
-            margin-bottom: 1.5rem; /* Added space below the logo */
-            padding: 0 1rem; /* Added horizontal padding */
+            margin-bottom: 1.5rem; 
+            padding: 0 1rem; 
         }
         
         .login-logo a {
@@ -33,8 +34,8 @@
             font-weight: 400;
             color: #000;
             text-decoration: none;
-            display: inline-block; /* Better for centering */
-            line-height: 1.4; /* Better line spacing */
+            display: inline-block; 
+            line-height: 1.4; 
         }
         
         .card-wider {
@@ -60,10 +61,10 @@
             border: none;
             transition: all 0.3s ease-in-out;
         }
-         
-        .accordion-button:not(.collapsed) {
-            background-color: #f8f9fa;
-            color: #000;
+        
+        button[type="submit"]:hover {
+            background: #007bff !important;
+            opacity: 0.9;
         }
         
         .accordion-button:focus {
@@ -73,10 +74,27 @@
         
         .gym-icon {
             font-size: 4rem;
-            color: #28a745;
+            color: #007bff;
             margin-bottom: 1rem;
             display: block;
             text-align: center;
+        }
+        
+        .role-selector {
+            margin-bottom: 1rem;
+        }
+        
+        .role-selector .btn-group {
+            width: 100%;
+        }
+        
+        .role-selector .btn {
+            flex: 1;
+        }
+        
+        .login-btn-container {
+            display: flex;
+            justify-content: flex-end;
         }
     </style>
 </head> 
@@ -84,7 +102,7 @@
 <body class="login-page">
     <div class="login-box">
         <div class="login-logo">
-            <a href="index.php">Gym Operational Management System (GOMS)</a>
+            <a>Gym Operational Management System (GOMS)</a>
         </div> 
         <div class="card card-wider">
             <div class="card-body login-card-body">
@@ -92,18 +110,28 @@
                 <p class="login-box-msg">Login to start your session</p>
 
                 <div class="accordion" id="accordionLogin">
-                    <!-- Admin Login Accordion -->
+                    <!-- User Login Accordion -->
                     <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingAdmin">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdmin" aria-expanded="false" aria-controls="collapseAdmin">
-                                Admin Login
+                        <h2 class="accordion-header" id="headingUser">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUser" aria-expanded="false" aria-controls="collapseUser">
+                                User Login
                             </button>
                         </h2>
-                        <div id="collapseAdmin" class="accordion-collapse collapse" aria-labelledby="headingAdmin" data-bs-parent="#accordionLogin">
+                        <div id="collapseUser" class="accordion-collapse collapse" aria-labelledby="headingUser" data-bs-parent="#accordionLogin">
                             <div class="accordion-body">
-                                <form method="post" action="#"> 
+                                <form id="loginForm" method="post">
+                                    <div class="role-selector">
+                                        <div class="btn-group" role="group">
+                                            <input type="radio" class="btn-check" name="userRole" id="managerRole" value="manager" autocomplete="off" checked>
+                                            <label class="btn btn-outline-primary" for="managerRole">Manager</label>
+                                            
+                                            <input type="radio" class="btn-check" name="userRole" id="staffRole" value="staff" autocomplete="off">
+                                            <label class="btn btn-outline-primary" for="staffRole">Staff</label>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="input-group mb-3">
-                                        <input type="text" class="form-control" placeholder="Admin ID" name="UserID" required>
+                                        <input type="text" class="form-control" placeholder="User ID" name="UserID" id="userId" required>
                                         <div class="input-group-text">
                                             <span class="bi bi-person"></span>
                                         </div>
@@ -115,9 +143,9 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-4">
-                                            <div class="d-grid gap-2">
-                                                <button class="btn text-white rounded-pill shadow-sm py-2 px-4" type="submit" name="login" id="click">Login</button>
+                                        <div class="col-12">
+                                            <div class="login-btn-container">
+                                                <button class="btn text-white rounded-pill shadow-sm py-2 px-4" type="submit" name="login" id="loginBtn">Login</button>
                                             </div>
                                         </div> 
                                     </div> 
@@ -132,6 +160,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Password toggle functionality
         document.getElementById("togglePassword").addEventListener("click", function () {
             const passwordField = document.getElementById("userPassword");
             const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
@@ -139,6 +168,36 @@
 
             this.classList.toggle("bi-eye");
             this.classList.toggle("bi-eye-slash");
+        });
+
+        // Form submission handler
+        document.getElementById("loginForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            const userId = document.getElementById("userId").value;
+            const password = document.getElementById("userPassword").value;
+            const userRole = document.querySelector('input[name="userRole"]:checked').value;
+            
+            // Simulate login - in a real app, this would be a server-side check
+            Swal.fire({
+                title: 'Logging in...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                    
+                    // Simulate API call delay
+                    setTimeout(() => {
+                        Swal.close();
+                        
+                        // Redirect based on role
+                        if (userRole === 'manager') {
+                            window.location.href = 'manager/dashboard.php';
+                        } else {
+                            window.location.href = 'staff/dashboard.php';
+                        }
+                    }, 1500);
+                }
+            });
         });
     </script>
 </body>
