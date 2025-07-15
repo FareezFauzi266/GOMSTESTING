@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add New Item Modal</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Inter", Arial, Helvetica, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    /* Overlay background */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    /* Modal box */
+    .modal-content {
+      background: white;
+      padding: 30px;
+      width: 90%;
+      max-width: 950px;
+      border-radius: 8px;
+      position: relative;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    /* Close button */
+    .close-button {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 20px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #999;
+    }
+    .close-button:hover {
+      color: #333;
+    }
+
+    .formbold-form-section-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 30px;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .formbold-form-label {
+      width: 35%;
+      font-weight: 500;
+      font-size: 15px;
+      color: #07074d;
+      margin-right: 10px;
+      text-align: left;
+    }
+    .formbold-form-input,
+    .formbold-form-select {
+      width: 60%;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      color: #333;
+    }
+    .formbold-form-input:focus,
+    .formbold-form-select:focus {
+      border-color: #6a64f1;
+      outline: none;
+    }
+
+    table {
+      width: 100%;
+    }
+    td {
+      vertical-align: top;
+      padding: 5px;
+      width: 50%;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .formbold-btn {
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .btn-cancel {
+      background-color: #ccc;
+      color: #333;
+    }
+
+    .btn-submit {
+      background-color: #6a64f1;
+      color: white;
+    }
+
+    .btn-cancel:hover {
+      background-color: #bbb;
+    }
+
+    .btn-submit:hover {
+      background-color: #584fd1;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Modal Wrapper -->
+<div class="modal-overlay" id="itemModal">
+  <div class="modal-content">
+    <button class="close-button" onclick="document.getElementById('itemModal').style.display='none'">×</button>
+
+    <form action="https://formbold.com/s/FORM_ID" method="POST">
+      <label class="formbold-form-section-title">Add New Item</label>
+      <table>
+        <tr>
+          <!-- LEFT: Item Details -->
+          <td>
+            <div class="form-row">
+              <label class="formbold-form-label">Item Name: <span style="color: red">*</span></label>
+              <input type="text" name="itemName" required placeholder="Enter item name" class="formbold-form-input" />
+            </div>
+            <div class="form-row">
+              <label class="formbold-form-label">Quantity:<span style="color: red">*</span></label>
+              <input type="text" name="quantity" placeholder="Enter quantity" class="formbold-form-input" />
+            </div>
+            <div class="form-row">
+              <label class="formbold-form-label">Item Price: <span style="color: red">*</span></label>
+              <input type="text" name="itemPrice" placeholder="Enter item price" class="formbold-form-input" />
+            </div>
+            <div class="form-row">
+              <label class="formbold-form-label">Category:<span style="color: red">*</span></label>
+              <select name="category" class="formbold-form-select">
+                <option value="" disabled selected>Select category</option>
+                <option value="Cardio Equipment">Cardio Equipment</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Strength Training Equipment">Strength Training Equipment</option>
+                <option value="Cleaning Supplies">Cleaning Supplies</option>
+                <option value="Supplements">Supplements</option>
+              </select>
+            </div>
+          </td>
+
+          <!-- RIGHT: Supplier Details -->
+          <td>
+            <div class="form-row">
+              <label class="formbold-form-label">Supplier Name: <span style="color: red">*</span></label>
+              <input type="text" name="supplierName" placeholder="Enter supplier name" class="formbold-form-input" />
+            </div>
+            <div class="form-row">
+              <label class="formbold-form-label">Supplier Phone: <span style="color: red">*</span></label>
+              <input type="text" name="supplierPhone" placeholder="Enter phone number" class="formbold-form-input" />
+            </div>
+            <div class="form-row">
+              <label class="formbold-form-label">Supplier Email:<span style="color: red">*</span></label>
+              <input type="email" name="supplierEmail" placeholder="Enter email" class="formbold-form-input" />
+            </div>
+            <div class="form-row">
+              <label class="formbold-form-label">PIC Name:</label>
+              <input type="text" name="picName" placeholder="Enter PIC name" class="formbold-form-input" />
+            </div>
+            <div class="form-row">
+              <label class="formbold-form-label">PIC Number:</label>
+              <input type="text" name="picNumber" placeholder="Enter PIC number" class="formbold-form-input" />
+            </div>
+            <!-- OR separator -->
+            <div class="form-row" style="justify-content: center;">
+            <label class="formbold-form-label" style="width: auto; font-weight: 600; color: #999;">— OR —</label>
+            </div>
+
+            <!-- Existing Supplier dropdown -->
+            <div class="form-row">
+              <label class="formbold-form-label">Existing Supplier:</label>
+              <select name="existingSupplier" class="formbold-form-select">
+                <option value="" disabled selected>Select supplier</option>
+                <option value="Supplier A">Supplier A</option>
+                <option value="Supplier B">Supplier B</option>
+                <option value="Supplier C">Supplier C</option>
+              </select>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      <div class="form-actions">
+        <button type="button" class="formbold-btn btn-cancel" onclick="document.getElementById('itemModal').style.display='none'">Cancel</button>
+        <button type="submit" class="formbold-btn btn-submit">Add Item</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>
