@@ -14,102 +14,102 @@ $currentPage = 'finance';
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"/>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="../app/plugins/fontawesome-free/css/all.min.css"/>
+  <!-- DataTables -->
+  <link rel="stylesheet" href="../app/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="../app/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
   <!-- overlayScrollbars -->
   <link rel="stylesheet" href="../app/plugins/overlayScrollbars/css/OverlayScrollbars.min.css"/>
   <!-- Theme style -->
   <link rel="stylesheet" href="../app/dist/css/adminlte.min.css" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f0f0;
+    .content-wrapper {
+      background-color: #f8fafc;
     }
-
-    .container {
-      background: white;
-      padding: 20px;
-      border: 2px solid #003366;
-      max-width: 1200px;
-      margin: auto;
-      position: relative;
-    }
-
-    h2 {
-      color: #003366;
-    }
-
-    .download-icon {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      font-size: 24px;
-      cursor: pointer;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    th, td {
-      border: 1px solid #003366;
-      padding: 8px;
-      text-align: center;
-    }
-
-    .delete-btn {
-      color: red;
-      cursor: pointer;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      justify-content: center;
+    
+    .ledger-header {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      z-index: 999;
+      margin-bottom: 20px;
+      padding: 0 10px;
     }
-
+    
+    .ledger-title {
+      color: #2d3748;
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+    
+    .export-btn {
+      background-color: #4299e1;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .export-btn:hover {
+      background-color: #3182ce;
+    }
+    
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0 2px;
+    }
+    
+    .edit-btn {
+      background-color: #4299e1;
+      color: white;
+    }
+    
+    .edit-btn:hover {
+      background-color: #3182ce;
+    }
+    
+    .delete-btn {
+      background-color: #f56565;
+      color: white;
+    }
+    
+    .delete-btn:hover {
+      background-color: #e53e3e;
+    }
+    
+    /* DataTable hover effect */
+    table.dataTable tbody tr:hover {
+      background-color: #ebf8ff !important;
+    }
+    
+    /* Modal styling */
     .modal-content {
-      background: white;
-      padding: 20px;
       border-radius: 8px;
-      width: 600px;
-      max-height: 90vh;
-      overflow-y: auto;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-
+    
     .modal-header {
-      font-size: 18px;
-      margin-bottom: 10px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
     }
-
-    .modal select,
-    .modal button {
-      margin-top: 10px;
+    
+    .modal-body {
+      padding: 20px;
     }
-
-    .modal table {
-      margin-top: 20px;
-    }
-
-    .print-btn {
-      padding: 8px 16px;
-    }
-
-    .modal-buttons {
-      margin-top: 15px;
-      text-align: right;
-    }
-
-    .modal-buttons button {
-      padding: 8px 16px;
-      margin-left: 10px;
+    
+    .modal-footer {
+      border-top: 1px solid #e2e8f0;
+      padding: 16px 20px;
     }
   </style>
 </head>
@@ -129,7 +129,7 @@ $currentPage = 'finance';
         <div class="container-fluid">
           <div class="row mb-2">
             <div class="col-sm-6">
-              <!--<h1>Financial Ledger</h1>-->
+              <h1>Financial Ledger</h1>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-right">
@@ -139,114 +139,169 @@ $currentPage = 'finance';
             </div>
           </div>
         </div>
-        <!-- /.container-fluid -->
       </section>
 
       <!-- Main content -->
       <section class="content">
         <div class="container-fluid">
-          <div class="container">
-            <h2>Financial Ledger</h2>
-            <div class="download-icon" onclick="openModal()">📥</div>
-
-            <table id="ledgerTable">
-              <thead>
-                <tr>
-                  <th>No.</th>
-                  <th>Ledger ID</th>
-                  <th>Ledger Name</th>
-                  <th>Payment ID</th>
-                  <th>Date</th>
-                  <th>Type</th>
-                  <th>Amount (RM)</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- Ledger data goes here -->
-              </tbody>
-            </table>
+          <div class="card">
+            <div class="card-body">
+              <div class="ledger-header">
+                <h2 class="ledger-title">Financial Records</h2>
+                <button class="export-btn" onclick="openModal()">
+                  <i class="fas fa-download"></i> Export
+                </button>
+              </div>
+              
+              <table id="ledgerTable" class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>No.</th>
+                    <th>Ledger ID</th>
+                    <th>Ledger Name</th>
+                    <th>Payment ID</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Amount (RM)</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Data will be loaded via DataTables -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
-      <!-- /.content -->
-    </div>
-    <!-- /.content-wrapper -->
-
-    <!-- Export Modal -->
-    <div class="modal" id="exportModal">
-      <div class="modal-content">
-        <div class="modal-header">Export Ledger</div>
-        <label for="periodSelect">Select Accounting Period:</label>
-        <select id="periodSelect" onchange="filterExportTable()">
-          <option value="">-- Select --</option>
-          <option value="daily">Daily</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-        </select>
-
-        <div id="filteredTableContainer"></div>
-
-        <div class="modal-buttons">
-          <button onclick="closeModal()">Cancel</button>
-          <button class="print-btn" onclick="window.print()">Print to PDF</button>
-        </div>
-      </div>
     </div>
 
     <footer class="main-footer">
       <div class="float-right d-none d-sm-block"></div>
       <strong> <?php copyright(); ?> </strong>
     </footer>
-
-    <!-- Control Sidebar -->
-    <aside class="control-sidebar control-sidebar-dark">
-      <!-- Control sidebar content goes here -->
-    </aside>
-    <!-- /.control-sidebar -->
   </div>
-  <!-- ./wrapper -->
+
+  <!-- Export Modal -->
+  <div class="modal fade" id="exportModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Export Ledger</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="periodSelect">Select Accounting Period:</label>
+            <select id="periodSelect" class="form-control" onchange="filterExportTable()">
+              <option value="">-- Select --</option>
+              <option value="daily">Daily</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+          <div id="filteredTableContainer" class="mt-3"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="window.print()">
+            <i class="fas fa-file-pdf mr-1"></i> Print to PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery -->
+  <script src="../app/plugins/jquery/jquery.min.js"></script>
+  <!-- Bootstrap 4 -->
+  <script src="../app/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- DataTables -->
+  <script src="../app/plugins/datatables/jquery.dataTables.min.js"></script>
+  <script src="../app/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+  <script src="../app/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+  <script src="../app/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+  <!-- overlayScrollbars -->
+  <script src="../app/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="../app/dist/js/adminlte.min.js"></script>
 
   <script>
-    const ledgerData = [
-      { ledgerID: "L001", ledgerName: "Jan Membership", paymentID: "P001", date: "2025-01-02", type: "payment", amount: 100.00 },
-      { ledgerID: "L002", ledgerName: "Protein Purchase", paymentID: "P002", date: "2025-01-03", type: "expense", amount: 80.00 },
-      { ledgerID: "L003", ledgerName: "Feb Maintenance", paymentID: "P003", date: "2025-02-10", type: "expense", amount: 150.00 },
-      { ledgerID: "L004", ledgerName: "March Income", paymentID: "P004", date: "2025-03-15", type: "income", amount: 200.00 },
-      { ledgerID: "L005", ledgerName: "Jan Walk-In", paymentID: "P005", date: "2025-01-05", type: "payment", amount: 50.00 }
-    ];
-
-    function populateMainTable() {
-      const tbody = document.querySelector("#ledgerTable tbody");
-      tbody.innerHTML = "";
-      ledgerData.forEach((item, index) => {
-        const row = `<tr>
-          <td>${index + 1}</td>
-          <td>${item.ledgerID}</td>
-          <td>${item.ledgerName}</td>
-          <td>${item.paymentID}</td>
-          <td>${item.date}</td>
-          <td>${item.type}</td>
-          <td>${item.amount.toFixed(2)}</td>
-          <td><span class="delete-btn" onclick="deleteRow(${index})">🗑️</span></td>
-        </tr>`;
-        tbody.innerHTML += row;
+    $(document).ready(function() {
+      // Initialize DataTable
+      $('#ledgerTable').DataTable({
+        "data": [
+          { ledgerID: "L001", ledgerName: "Jan Membership", paymentID: "P001", date: "2025-01-02", type: "payment", amount: 100.00 },
+          { ledgerID: "L002", ledgerName: "Protein Purchase", paymentID: "P002", date: "2025-01-03", type: "expense", amount: 80.00 },
+          { ledgerID: "L003", ledgerName: "Feb Maintenance", paymentID: "P003", date: "2025-02-10", type: "expense", amount: 150.00 },
+          { ledgerID: "L004", ledgerName: "March Income", paymentID: "P004", date: "2025-03-15", type: "income", amount: 200.00 },
+          { ledgerID: "L005", ledgerName: "Jan Walk-In", paymentID: "P005", date: "2025-01-05", type: "payment", amount: 50.00 }
+        ],
+        "columns": [
+          { 
+            "data": null,
+            "render": function(data, type, row, meta) {
+              return meta.row + 1;
+            }
+          },
+          { "data": "ledgerID" },
+          { "data": "ledgerName" },
+          { "data": "paymentID" },
+          { "data": "date" },
+          { "data": "type" },
+          { 
+            "data": "amount",
+            "render": function(data) {
+              return 'RM ' + data.toFixed(2);
+            }
+          },
+          {
+            "data": null,
+            "render": function(data) {
+              return `
+                <button class="action-btn edit-btn" onclick="editEntry('${data.ledgerID}')">
+                  <i class="fas fa-pencil-alt"></i>
+                </button>
+                <button class="action-btn delete-btn" onclick="deleteEntry('${data.ledgerID}')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              `;
+            },
+            "orderable": false
+          }
+        ],
+        "responsive": true,
+        "autoWidth": false,
+        "pageLength": 10,
+        "language": {
+          "search": "_INPUT_",
+          "searchPlaceholder": "Search...",
+          "lengthMenu": "Show _MENU_ entries",
+          "info": "Showing _START_ to _END_ of _TOTAL_ entries",
+          "paginate": {
+            "previous": "<i class='fas fa-chevron-left'></i>",
+            "next": "<i class='fas fa-chevron-right'></i>"
+          }
+        }
       });
+    });
+
+    function editEntry(ledgerID) {
+      alert('Editing entry: ' + ledgerID);
+      // Implement your edit functionality here
     }
 
-    function deleteRow(index) {
-      if (confirm("Delete this ledger entry?")) {
-        ledgerData.splice(index, 1);
-        populateMainTable();
+    function deleteEntry(ledgerID) {
+      if (confirm('Are you sure you want to delete this ledger entry?')) {
+        alert('Deleted entry: ' + ledgerID);
+        // Implement your delete functionality here
       }
     }
 
     function openModal() {
-      document.getElementById("exportModal").style.display = "flex";
-    }
-
-    function closeModal() {
-      document.getElementById("exportModal").style.display = "none";
+      $('#exportModal').modal('show');
     }
 
     function filterExportTable() {
@@ -255,22 +310,23 @@ $currentPage = 'finance';
       let filtered = [];
 
       if (selected === "daily") {
-        filtered = ledgerData.filter(l => l.date === "2025-01-05");
+        filtered = $('#ledgerTable').DataTable().data().toArray().filter(l => l.date === "2025-01-05");
       } else if (selected === "monthly") {
-        filtered = ledgerData.filter(l => l.date.startsWith("2025-01"));
+        filtered = $('#ledgerTable').DataTable().data().toArray().filter(l => l.date.startsWith("2025-01"));
       } else if (selected === "yearly") {
-        filtered = ledgerData.filter(l => l.date.startsWith("2025"));
+        filtered = $('#ledgerTable').DataTable().data().toArray().filter(l => l.date.startsWith("2025"));
       }
 
       if (filtered.length === 0) {
-        container.innerHTML = "<p>No transaction detected.</p>";
+        container.innerHTML = "<p class='text-muted'>No transactions found for selected period.</p>";
         return;
       }
 
-      let table = `<table>
+      let table = `<div class="table-responsive"><table class="table table-bordered">
         <thead><tr>
           <th>No.</th><th>Ledger ID</th><th>Name</th><th>Payment ID</th><th>Date</th><th>Type</th><th>Amount (RM)</th>
         </tr></thead><tbody>`;
+      
       filtered.forEach((item, i) => {
         table += `<tr>
           <td>${i + 1}</td>
@@ -282,24 +338,10 @@ $currentPage = 'finance';
           <td>${item.amount.toFixed(2)}</td>
         </tr>`;
       });
-      table += "</tbody></table>";
+      
+      table += "</tbody></table></div>";
       container.innerHTML = table;
     }
-
-    window.onload = populateMainTable;
-    window.onclick = function(e) {
-      if (e.target.classList.contains("modal")) {
-        closeModal();
-      }
-    };
   </script>
-  <!-- jQuery -->
-    <script src="../app/plugins/jquery/jquery.min.js"></script>
-    <!-- Bootstrap 4 -->
-    <script src="../app/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- overlayScrollbars -->
-    <script src="../app/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="../app/dist/js/adminlte.min.js"></script>
 </body>
 </html>
