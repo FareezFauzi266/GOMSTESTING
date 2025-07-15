@@ -2,7 +2,7 @@
 <html lang="en"> 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>GOMS</title>
+    <title>Gym Operational Management System (GOMS)</title>
     <link rel="icon" href="#">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css">
@@ -22,11 +22,19 @@
             margin: 0 auto;
         }
         
+        .login-logo {
+            text-align: center;
+            margin-bottom: 1.5rem; /* Added space below the logo */
+            padding: 0 1rem; /* Added horizontal padding */
+        }
+        
         .login-logo a {
             font-size: 24px;
-            font-weight: bold;
+            font-weight: 400;
             color: #000;
             text-decoration: none;
+            display: inline-block; /* Better for centering */
+            line-height: 1.4; /* Better line spacing */
         }
         
         .card-wider {
@@ -48,17 +56,11 @@
         }
         
         button[type="submit"] {
-            background: linear-gradient(90deg, #28a745, #218838);
+            background: #007bff;
             border: none;
             transition: all 0.3s ease-in-out;
         }
-        
-        button[type="submit"]:hover {
-            background: linear-gradient(90deg, #1e7e34, #155d27);
-            transform: translateY(-2px);
-            filter: brightness(1.2);
-        }
-        
+         
         .accordion-button:not(.collapsed) {
             background-color: #f8f9fa;
             color: #000;
@@ -68,22 +70,29 @@
             box-shadow: none;
             border-color: rgba(0,0,0,.125);
         }
+        
+        .gym-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+            display: block;
+            text-align: center;
+        }
     </style>
 </head> 
 
 <body class="login-page">
     <div class="login-box">
         <div class="login-logo">
-            <a href="index.php"><b>GOMS</b></a>
+            <a href="index.php">Gym Operational Management System (GOMS)</a>
         </div> 
         <div class="card card-wider">
             <div class="card-body login-card-body">
-                <img src="#" class="card-img-top" alt="GOMS" style="width: 79%; margin-left:10%; margin-right:5%; margin-bottom: 5%;">
+                <i class="bi bi-dumbbell gym-icon"></i>
                 <p class="login-box-msg">Login to start your session</p>
 
                 <div class="accordion" id="accordionLogin">
-
-                    <!-- User Login Accordion -->
+                    <!-- Admin Login Accordion -->
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="headingAdmin">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdmin" aria-expanded="false" aria-controls="collapseAdmin">
