@@ -17,6 +17,8 @@ $currentPage = 'finance';
   <!-- DataTables -->
   <link rel="stylesheet" href="../app/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
   <link rel="stylesheet" href="../app/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="../app/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
   <!-- overlayScrollbars -->
   <link rel="stylesheet" href="../app/plugins/overlayScrollbars/css/OverlayScrollbars.min.css"/>
   <!-- Theme style -->
@@ -62,7 +64,6 @@ $currentPage = 'finance';
       justify-content: center;
       width: 30px;
       height: 30px;
-      border-radius: 4px;
       cursor: pointer;
       margin: 0 2px;
     }
@@ -85,12 +86,10 @@ $currentPage = 'finance';
       background-color: #e53e3e;
     }
     
-    /* DataTable hover effect */
     table.dataTable tbody tr:hover {
       background-color: #ebf8ff !important;
     }
     
-    /* Modal styling */
     .modal-content {
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -110,6 +109,24 @@ $currentPage = 'finance';
     .modal-footer {
       border-top: 1px solid #e2e8f0;
       padding: 16px 20px;
+    }
+    
+    .readonly-section {
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .readonly-field {
+      background-color: #f8f9fa;
+      padding: 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    
+    .form-required label:after {
+      content: " *";
+      color: #e53e3e;
     }
   </style>
 </head>
@@ -214,6 +231,98 @@ $currentPage = 'finance';
     </div>
   </div>
 
+  <!-- Edit Modal -->
+  <div class="modal fade" id="editModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Ledger Entry</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="readonly-section row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Payment ID</label>
+                <div class="readonly-field" id="editPaymentId">P001</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Created Date</label>
+                <div class="readonly-field" id="editCreatedDate">2025-01-02</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Created By</label>
+                <div class="readonly-field" id="editCreatedBy">Manager Name</div>
+              </div>
+            </div>
+          </div>
+          
+          <form id="editForm">
+            <div class="row"> 
+              <div class="col-md-6">
+                <div class="form-group form-required">
+                  <label for="editLedgerName">Ledger Name</label>
+                  <input type="text" class="form-control" id="editLedgerName" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group form-required">
+                  <label for="editType">Type</label>
+                  <select class="form-control" id="editType" required>
+                    <option value="membership">Membership</option>
+                    <option value="merchandise">Merchandise</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row"> 
+              <div class="col-md-6">
+                <div class="form-group form-required">
+                  <label for="editPaymentMethod">Payment Method</label>
+                  <select class="form-control" id="editPaymentMethod" required>
+                    <option value="cash">Cash</option>
+                    <option value="card">Credit/Debit Card</option>
+                    <option value="transfer">Bank Transfer</option>
+                    <option value="ewallet">E-Wallet</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group form-required">
+                  <label for="editAmount">Amount (RM)</label>
+                  <input type="number" step="0.01" class="form-control" id="editAmount" required>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="editDiscount">Discount (RM)</label>
+                  <input type="number" step="0.01" class="form-control" id="editDiscount">
+                </div>
+              </div>
+            </div>
+            
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="saveChangesBtn">
+            <i class="fas fa-save mr-1"></i> Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- jQuery -->
   <script src="../app/plugins/jquery/jquery.min.js"></script>
   <!-- Bootstrap 4 -->
@@ -223,6 +332,8 @@ $currentPage = 'finance';
   <script src="../app/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
   <script src="../app/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
   <script src="../app/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+  <!-- SweetAlert2 -->
+  <script src="../app/plugins/sweetalert2/sweetalert2.min.js"></script>
   <!-- overlayScrollbars -->
   <script src="../app/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
   <!-- AdminLTE App -->
@@ -230,14 +341,64 @@ $currentPage = 'finance';
 
   <script>
     $(document).ready(function() {
-      // Initialize DataTable
-      $('#ledgerTable').DataTable({
+      // DataTable
+      var table = $('#ledgerTable').DataTable({
         "data": [
-          { ledgerID: "L001", ledgerName: "Jan Membership", paymentID: "P001", date: "2025-01-02", type: "payment", amount: 100.00 },
-          { ledgerID: "L002", ledgerName: "Protein Purchase", paymentID: "P002", date: "2025-01-03", type: "expense", amount: 80.00 },
-          { ledgerID: "L003", ledgerName: "Feb Maintenance", paymentID: "P003", date: "2025-02-10", type: "expense", amount: 150.00 },
-          { ledgerID: "L004", ledgerName: "March Income", paymentID: "P004", date: "2025-03-15", type: "income", amount: 200.00 },
-          { ledgerID: "L005", ledgerName: "Jan Walk-In", paymentID: "P005", date: "2025-01-05", type: "payment", amount: 50.00 }
+          { 
+            ledgerID: "L001", 
+            ledgerName: "Jan Membership", 
+            paymentID: "P001", 
+            date: "2025-01-02", 
+            type: "Membership", 
+            amount: 100.00,
+            paymentMethod: "card",
+            discount: 0.00,
+            createdBy: "John Doe"
+          },
+          { 
+            ledgerID: "L002", 
+            ledgerName: "Protein Purchase", 
+            paymentID: "P002", 
+            date: "2025-01-03", 
+            type: "expense", 
+            amount: 80.00,
+            paymentMethod: "transfer",
+            discount: 5.00,
+            createdBy: "John Doe"
+          },
+          { 
+            ledgerID: "L003", 
+            ledgerName: "Feb Maintenance", 
+            paymentID: "P003", 
+            date: "2025-02-10", 
+            type: "expense", 
+            amount: 150.00,
+            paymentMethod: "cash",
+            discount: 0.00,
+            createdBy: "Jane Smith"
+          },
+          { 
+            ledgerID: "L004", 
+            ledgerName: "March Income", 
+            paymentID: "P004", 
+            date: "2025-03-15", 
+            type: "income", 
+            amount: 200.00,
+            paymentMethod: "transfer",
+            discount: 0.00,
+            createdBy: "Jane Smith"
+          },
+          { 
+            ledgerID: "L005", 
+            ledgerName: "Jan Walk-In", 
+            paymentID: "P005", 
+            date: "2025-01-05", 
+            type: "payment", 
+            amount: 50.00,
+            paymentMethod: "cash",
+            discount: 0.00,
+            createdBy: "John Doe"
+          }
         ],
         "columns": [
           { 
@@ -264,7 +425,7 @@ $currentPage = 'finance';
                 <button class="action-btn edit-btn" onclick="editEntry('${data.ledgerID}')">
                   <i class="fas fa-pencil-alt"></i>
                 </button>
-                <button class="action-btn delete-btn" onclick="deleteEntry('${data.ledgerID}')">
+                <button class="action-btn delete-btn" onclick="deleteEntry('${data.ledgerID}', '${data.ledgerName}')">
                   <i class="fas fa-trash"></i>
                 </button>
               `;
@@ -286,18 +447,72 @@ $currentPage = 'finance';
           }
         }
       });
+
+      // Save changes 
+      $('#saveChangesBtn').click(function() {
+        if ($('#editForm')[0].checkValidity()) {
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Changes Saved',
+            text: 'The ledger entry has been updated successfully',
+            timer: 2000,
+            showConfirmButton: false
+          });
+          
+          
+          $('#editModal').modal('hide');
+        } else {
+          $('#editForm')[0].reportValidity();
+        }
+      });
     });
 
     function editEntry(ledgerID) {
-      alert('Editing entry: ' + ledgerID);
-      // Implement your edit functionality here
+    
+    var table = $('#ledgerTable').DataTable();
+    var data = table.data().toArray();
+    var entry = data.find(item => item.ledgerID === ledgerID);
+    
+    if (entry) {
+      // Populate the readonly fields
+      $('#editPaymentId').text(entry.paymentID);
+      $('#editCreatedDate').text(entry.date);
+      $('#editCreatedBy').text(entry.createdBy);
+      
+      // Populate the editable fields
+      $('#editLedgerName').val(entry.ledgerName);
+      $('#editType').val(entry.type === 'payment' ? 'membership' : 'merchandise');
+      $('#editPaymentMethod').val(entry.paymentMethod);
+      $('#editAmount').val(entry.amount);
+      $('#editDiscount').val(entry.discount || '');
+      
+      // Show the modal
+      $('#editModal').modal('show');
     }
+  }
 
-    function deleteEntry(ledgerID) {
-      if (confirm('Are you sure you want to delete this ledger entry?')) {
-        alert('Deleted entry: ' + ledgerID);
-        // Implement your delete functionality here
-      }
+    function deleteEntry(ledgerID, ledgerName) {
+      Swal.fire({
+        title: 'Delete Ledger Entry?',
+        html: `Are you sure you want to delete <strong>${ledgerName}</strong>?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          
+          Swal.fire(
+            'Deleted!',
+            'The ledger entry has been deleted.',
+            'success'
+          );
+          
+        }
+      });
     }
 
     function openModal() {
