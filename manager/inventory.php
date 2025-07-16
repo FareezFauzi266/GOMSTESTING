@@ -123,6 +123,18 @@ $currentPage = 'inventory';
       border-radius: 8px;
       margin-top: 20px;
     }
+    
+    .new-supplier-toggle {
+      color: #4299e1;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      display: inline-block;
+    }
+    
+    .new-supplier-toggle:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -168,7 +180,6 @@ $currentPage = 'inventory';
               <table id="inventoryTable" class="table table-bordered table-hover">
                 <thead>
                   <tr>
-                    <th>No.</th>
                     <th>Item Code</th>
                     <th>Item Name</th>
                     <th>Quantity</th>
@@ -179,7 +190,7 @@ $currentPage = 'inventory';
                   </tr>
                 </thead>
                 <tbody>
-                  <!-- Data -->
+                  <!-- Data will be loaded via DataTables -->
                 </tbody>
               </table>
             </div>
@@ -210,8 +221,8 @@ $currentPage = 'inventory';
               <div class="col-md-6">
                 <h5>Item Information</h5>
                 <div class="form-group">
-                    <label>Item Code</label>
-                    <div class="form-control" style="background-color: #f8f9fa;" id="displayItemCode">Loading...</div>
+                  <label>Item Code</label>
+                  <div class="form-control" style="background-color: #f8f9fa;" id="displayItemCode"></div>
                 </div>
                 <div class="form-group form-required">
                   <label for="addItemName">Item Name</label>
@@ -241,18 +252,16 @@ $currentPage = 'inventory';
               <div class="col-md-6">
                 <h5>Supplier Information</h5>
                 <div class="form-group">
-                  <label for="existingSupplier">Existing Supplier</label>
-                  <select class="form-control" id="existingSupplier" onchange="fillSupplierInfo()">
+                  <label for="existingSupplier">Supplier</label>
+                  <select class="form-control" id="existingSupplier">
                     <option value="">-- Select Supplier --</option>
-                    <option value="1">Supplement King Sdn Bhd</option>
-                    <option value="2">Gym Gear Malaysia</option>
-                    <option value="3">Fitness Apparel Co.</option>
-                    <option value="4">New Supplier (fill below)</option>
+                    <!-- Options will be populated by JavaScript -->
                   </select>
+                  <span class="new-supplier-toggle" onclick="toggleNewSupplier()">+ Add New Supplier</span>
                 </div>
                 
-                <div class="supplier-info">
-                  <div class="form-group">
+                <div class="supplier-info" id="newSupplierInfo" style="display: none;">
+                  <div class="form-group form-required">
                     <label for="supplierName">Supplier Name</label>
                     <input type="text" class="form-control" id="supplierName">
                   </div>
@@ -304,7 +313,7 @@ $currentPage = 'inventory';
                 <h5>Item Information</h5>
                 <div class="form-group">
                   <label>Item Code</label>
-                  <div class="form-control" style="background-color: #f8f9fa;" id="editItemCode">ITM001</div>
+                  <div class="form-control" style="background-color: #f8f9fa;" id="editItemCode"></div>
                 </div>
                 <div class="form-group form-required">
                   <label for="editItemName">Item Name</label>
@@ -334,12 +343,7 @@ $currentPage = 'inventory';
                 <h5>Supplier Information</h5>
                 <div class="form-group">
                   <label for="editSupplier">Supplier Name</label>
-                  <select class="form-control" id="editSupplier">
-                    <option value="1">Supplement King Sdn Bhd</option>
-                    <option value="2">Gym Gear Malaysia</option>
-                    <option value="3">Fitness Apparel Co.</option>
-                    <option value="4">Other Supplier</option>
-                  </select>
+                  <select class="form-control" id="editSupplier"></select>
                 </div>
               </div>
             </div>
@@ -371,27 +375,132 @@ $currentPage = 'inventory';
   <!-- AdminLTE App -->
   <script src="../app/dist/js/adminlte.min.js"></script>
 
-<!-- Add this JavaScript code to your inventory.php file -->
-
 <script>
+    // Global array to track all suppliers
+    let allSuppliers = [
+        { id: "1", name: "Supplement King Sdn Bhd", phone: "03-12345678", email: "info@supplementking.com", picName: "Ali bin Ahmad", picPhone: "012-3456789" },
+        { id: "2", name: "Gym Gear Malaysia", phone: "03-98765432", email: "sales@gymgear.com", picName: "Siti binti Mohd", picPhone: "019-8765432" },
+        { id: "3", name: "Fitness Apparel Co.", phone: "03-55556666", email: "contact@fitnessapparel.com", picName: "Raj Kumar", picPhone: "011-22334455" },
+        { id: "4", name: "Protein Power Sdn Bhd", phone: "03-11112222", email: "sales@proteinpower.com", picName: "Ahmad Farhan", picPhone: "012-9988776" },
+        { id: "5", name: "Iron Strong Equipment", phone: "03-22223333", email: "support@ironstrong.com", picName: "Sarah Lim", picPhone: "017-5544332" },
+        { id: "6", name: "Healthy Living Nutrition", phone: "03-33334444", email: "info@healthyliving.com", picName: "David Wong", picPhone: "019-8877665" },
+        { id: "7", name: "Elite Fitness Supplies", phone: "03-44445555", email: "orders@elitefitness.com", picName: "Nurul Hasanah", picPhone: "011-2233556" },
+        { id: "8", name: "Muscle Pro International", phone: "03-55556666", email: "my@musclepro.com", picName: "Jason Tan", picPhone: "016-7788990" },
+        { id: "9", name: "Gym Wear Fashion", phone: "03-66667777", email: "sales@gymwearfashion.com", picName: "Emily Chong", picPhone: "013-4455667" },
+        { id: "10", name: "Supplement World", phone: "03-77778888", email: "contact@supplementworld.com", picName: "Kevin Raj", picPhone: "018-1122334" },
+        { id: "11", name: "Power Lift Equipment", phone: "03-88889999", email: "info@powerlift.com", picName: "Lisa Koh", picPhone: "014-5566778" },
+        { id: "12", name: "NutriMax Solutions", phone: "03-99990000", email: "support@nutrimax.com", picName: "Daniel Lee", picPhone: "011-3344556" },
+        { id: "13", name: "Titan Fitness Gear", phone: "03-10101010", email: "sales@titanfitness.com", picName: "Amirul Hakim", picPhone: "017-8899001" }
+    ];
+
+    // Function to toggle new supplier form
+    function toggleNewSupplier() {
+        const newSupplierInfo = $('#newSupplierInfo');
+        const existingSupplier = $('#existingSupplier');
+        
+        if (newSupplierInfo.is(':visible')) {
+            newSupplierInfo.hide();
+            existingSupplier.val('').trigger('change');
+        } else {
+            newSupplierInfo.show();
+            existingSupplier.val('');
+            // Clear any existing supplier info
+            $('#supplierName').val('');
+            $('#supplierPhone').val('');
+            $('#supplierEmail').val('');
+            $('#picName').val('');
+            $('#picPhone').val('');
+        }
+    }
+
+    // Function to generate next item code
+    function generateItemCode(table) {
+        const data = table.data().toArray();
+        if (data.length === 0) return 'ITM001';
+        
+        const codes = data.map(item => {
+            const match = item.itemCode.match(/ITM(\d+)/);
+            return match ? parseInt(match[1]) : 0;
+        });
+        
+        const maxCode = Math.max(...codes);
+        return 'ITM' + String(maxCode + 1).padStart(3, '0');
+    }
+
+    // Function to populate supplier dropdown
+    function populateSupplierDropdown() {
+        const dropdown = $('#existingSupplier');
+        const editDropdown = $('#editSupplier');
+        
+        // Clear and add default option
+        dropdown.empty().append('<option value="">-- Select Supplier --</option>');
+        editDropdown.empty();
+        
+        // Sort suppliers alphabetically by name
+        allSuppliers.sort((a, b) => a.name.localeCompare(b.name));
+        
+        // Add suppliers to both dropdowns
+        allSuppliers.forEach(supplier => {
+            dropdown.append(`<option value="${supplier.id}">${supplier.name}</option>`);
+            editDropdown.append(`<option value="${supplier.id}">${supplier.name}</option>`);
+        });
+    }
+
+    // Function to fill supplier info when existing supplier is selected
+    function fillSupplierInfo() {
+        const supplierId = $('#existingSupplier').val();
+        const supplier = allSuppliers.find(s => s.id === supplierId);
+        
+        if (supplier) {
+            // Hide new supplier form if showing
+            $('#newSupplierInfo').hide();
+            
+            // Fill the supplier info fields
+            $('#supplierName').val(supplier.name);
+            $('#supplierPhone').val(supplier.phone);
+            $('#supplierEmail').val(supplier.email);
+            $('#picName').val(supplier.picName);
+            $('#picPhone').val(supplier.picPhone);
+        }
+    }
+
+    // Function to add new supplier
+    function addNewSupplier(supplierData) {
+        // Generate new ID (find max existing ID + 1)
+        const newId = allSuppliers.length > 0 
+            ? String(Math.max(...allSuppliers.map(s => parseInt(s.id))) + 1)
+            : "1";
+        
+        const newSupplier = {
+            id: newId,
+            name: supplierData.name || 'New Supplier',
+            phone: supplierData.phone || '',
+            email: supplierData.email || '',
+            picName: supplierData.picName || '',
+            picPhone: supplierData.picPhone || ''
+        };
+        
+        // Add to global suppliers array
+        allSuppliers.push(newSupplier);
+        
+        // Update dropdowns
+        populateSupplierDropdown();
+        
+        return newSupplier;
+    }
+
     $(document).ready(function() {
-        // Initialize DataTable with empty data
+        // Initialize DataTable
         var table = $('#inventoryTable').DataTable({
-            "data": [], // Start with empty data
+            "data": [],
             "columns": [
-                { 
-                    "data": null,
-                    "render": function(data, type, row, meta) {
-                        return meta.row + 1;
-                    }
-                },
                 { "data": "itemCode" },
                 { "data": "itemName" },
                 { "data": "quantity" },
                 { 
                     "data": "price",
                     "render": function(data) {
-                        return 'RM ' + data.toFixed(2);
+                        return 'RM ' + parseFloat(data).toFixed(2);
                     }
                 },
                 { "data": "category" },
@@ -428,21 +537,38 @@ $currentPage = 'inventory';
 
         // Load initial data
         loadInitialData(table);
+        populateSupplierDropdown();
+
+        // Clear supplier info when "Select Supplier" is chosen
+        $('#existingSupplier').change(function() {
+            if (!this.value) {
+                $('#supplierName').val('');
+                $('#supplierPhone').val('');
+                $('#supplierEmail').val('');
+                $('#picName').val('');
+                $('#picPhone').val('');
+            } else {
+                fillSupplierInfo();
+            }
+        });
 
         // Save changes 
         $('#saveChangesBtn').click(function() {
             if ($('#editForm')[0].checkValidity()) {
                 const itemCode = $('#editItemCode').text();
+                const supplierId = $('#editSupplier').val();
+                const supplier = allSuppliers.find(s => s.id === supplierId);
+                
                 const updatedItem = {
                     itemCode: itemCode,
                     itemName: $('#editItemName').val(),
                     quantity: parseInt($('#editQuantity').val()),
                     price: parseFloat($('#editPrice').val()),
                     category: $('#editCategory').val(),
-                    supplierName: $('#editSupplier option:selected').text()
+                    supplierName: supplier ? supplier.name : 'Unknown Supplier',
+                    supplierId: supplierId
                 };
 
-                // Update the DataTable
                 const data = table.data().toArray();
                 const index = data.findIndex(item => item.itemCode === itemCode);
                 if (index !== -1) {
@@ -465,20 +591,54 @@ $currentPage = 'inventory';
         // Add item
         $('#addItemBtn').click(function() {
             if ($('#addForm')[0].checkValidity()) {
-                // Generate a new item code (in a real app, this would come from the server)
-                const newItemCode = 'ITM' + String(table.data().length + 1).padStart(3, '0');
+                const table = $('#inventoryTable').DataTable();
+                const newItemCode = $('#displayItemCode').text();
+                let supplierName, supplierId = $('#existingSupplier').val();
                 
+                // Check if we're using an existing supplier or adding a new one
+                if (supplierId) {
+                    // Existing supplier
+                    const supplier = allSuppliers.find(s => s.id === supplierId);
+                    supplierName = supplier.name;
+                } else {
+                    // New supplier - validate required fields
+                    if (!$('#supplierName').val()) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Supplier Required',
+                            text: 'Please select an existing supplier or enter new supplier information',
+                            timer: 2000
+                        });
+                        return;
+                    }
+                    
+                    // Create new supplier object
+                    const newSupplier = {
+                        name: $('#supplierName').val(),
+                        phone: $('#supplierPhone').val(),
+                        email: $('#supplierEmail').val(),
+                        picName: $('#picName').val(),
+                        picPhone: $('#picPhone').val()
+                    };
+                    
+                    // Add to suppliers array and get the new ID
+                    const addedSupplier = addNewSupplier(newSupplier);
+                    supplierName = addedSupplier.name;
+                    supplierId = addedSupplier.id;
+                }
+
+                // Create the new inventory item
                 const newItem = {
                     itemCode: newItemCode,
                     itemName: $('#addItemName').val(),
                     quantity: parseInt($('#addQuantity').val()),
                     price: parseFloat($('#addPrice').val()),
                     category: $('#addCategory').val(),
-                    supplierName: $('#existingSupplier').val() === "4" ? 
-                        $('#supplierName').val() : $('#existingSupplier option:selected').text()
+                    supplierName: supplierName,
+                    supplierId: supplierId
                 };
 
-                // Add to DataTable
+                // Add to table
                 table.row.add(newItem).draw();
 
                 Swal.fire({
@@ -489,8 +649,9 @@ $currentPage = 'inventory';
                     showConfirmButton: false
                 });
                 
-                // Reset form
+                // Reset form and close modal
                 $('#addForm')[0].reset();
+                $('#newSupplierInfo').hide();
                 $('#addModal').modal('hide');
             } else {
                 $('#addForm')[0].reportValidity();
@@ -499,87 +660,154 @@ $currentPage = 'inventory';
     });
 
     function loadInitialData(table) {
-        // Sample initial data
         const initialData = [
-            { 
-                itemCode: "ITM001", 
-                itemName: "Whey Protein 5lbs", 
-                quantity: 25, 
-                price: 199.99, 
-                category: "Supplements",
-                supplierName: "Supplement King Sdn Bhd"
-            },
-            { 
-                itemCode: "ITM002", 
-                itemName: "Yoga Mat", 
-                quantity: 15, 
-                price: 59.90, 
-                category: "Equipment",
-                supplierName: "Gym Gear Malaysia"
-            },
-            { 
-                itemCode: "ITM003", 
-                itemName: "Training Gloves", 
-                quantity: 30, 
-                price: 45.00, 
-                category: "Accessories",
-                supplierName: "Fitness Apparel Co."
-            },
-            { 
-                itemCode: "ITM004", 
-                itemName: "Yoga Mat", 
-                quantity: 15, 
-                price: 59.90, 
-                category: "Equipment",
-                supplierName: "Gym Gear Malaysia"
-            },
-            { 
-                itemCode: "ITM005", 
-                itemName: "Training Gloves", 
-                quantity: 30, 
-                price: 45.00, 
-                category: "Accessories",
-                supplierName: "Fitness Apparel Co."
-            }
-        ];
+        { 
+            itemCode: "ITM001", 
+            itemName: "Whey Protein 5lbs", 
+            quantity: 25, 
+            price: 199.99, 
+            category: "Supplements",
+            supplierName: "Supplement King Sdn Bhd",
+            supplierId: "1"
+        },
+        { 
+            itemCode: "ITM002", 
+            itemName: "Yoga Mat", 
+            quantity: 15, 
+            price: 59.90, 
+            category: "Equipment",
+            supplierName: "Gym Gear Malaysia",
+            supplierId: "2"
+        },
+        { 
+            itemCode: "ITM003", 
+            itemName: "Training Gloves", 
+            quantity: 30, 
+            price: 45.00, 
+            category: "Accessories",
+            supplierName: "Fitness Apparel Co.",
+            supplierId: "3"
+        },
+        { 
+            itemCode: "ITM004", 
+            itemName: "Mass Gainer 10lbs", 
+            quantity: 18, 
+            price: 249.99, 
+            category: "Supplements",
+            supplierName: "Protein Power Sdn Bhd",
+            supplierId: "4"
+        },
+        { 
+            itemCode: "ITM005", 
+            itemName: "Adjustable Dumbbell Set", 
+            quantity: 8, 
+            price: 599.00, 
+            category: "Equipment",
+            supplierName: "Iron Strong Equipment",
+            supplierId: "5"
+        },
+        { 
+            itemCode: "ITM006", 
+            itemName: "Organic Protein Bars (Box of 12)", 
+            quantity: 42, 
+            price: 89.90, 
+            category: "Supplements",
+            supplierName: "Healthy Living Nutrition",
+            supplierId: "6"
+        },
+        { 
+            itemCode: "ITM007", 
+            itemName: "Resistance Band Set", 
+            quantity: 35, 
+            price: 65.50, 
+            category: "Equipment",
+            supplierName: "Elite Fitness Supplies",
+            supplierId: "7"
+        },
+        { 
+            itemCode: "ITM008", 
+            itemName: "Pre-Workout Powder", 
+            quantity: 22, 
+            price: 119.50, 
+            category: "Supplements",
+            supplierName: "Muscle Pro International",
+            supplierId: "8"
+        },
+        { 
+            itemCode: "ITM009", 
+            itemName: "Compression Tights", 
+            quantity: 28, 
+            price: 79.90, 
+            category: "Apparel",
+            supplierName: "Gym Wear Fashion",
+            supplierId: "9"
+        },
+        { 
+            itemCode: "ITM010", 
+            itemName: "BCAA Powder", 
+            quantity: 31, 
+            price: 109.00, 
+            category: "Supplements",
+            supplierName: "Supplement World",
+            supplierId: "10"
+        },
+        { 
+            itemCode: "ITM011", 
+            itemName: "Olympic Barbell", 
+            quantity: 5, 
+            price: 399.00, 
+            category: "Equipment",
+            supplierName: "Power Lift Equipment",
+            supplierId: "11"
+        },
+        { 
+            itemCode: "ITM012", 
+            itemName: "Multivitamin Pack", 
+            quantity: 50, 
+            price: 69.90, 
+            category: "Supplements",
+            supplierName: "NutriMax Solutions",
+            supplierId: "12"
+        },
+        { 
+            itemCode: "ITM013", 
+            itemName: "Weightlifting Belt", 
+            quantity: 14, 
+            price: 89.00, 
+            category: "Accessories",
+            supplierName: "Titan Fitness Gear",
+            supplierId: "13"
+        },
+        { 
+            itemCode: "ITM014", 
+            itemName: "Kettlebells (20kg)", 
+            quantity: 12, 
+            price: 129.00, 
+            category: "Equipment",
+            supplierName: "Iron Strong Equipment",
+            supplierId: "5"
+        },
+        { 
+            itemCode: "ITM015", 
+            itemName: "Training Tank Top", 
+            quantity: 37, 
+            price: 49.90, 
+            category: "Apparel",
+            supplierName: "Gym Wear Fashion",
+            supplierId: "9"
+        }
+    ];
         
-        // Add all initial data
         table.rows.add(initialData).draw();
     }
 
     function openAddModal() {
+        const table = $('#inventoryTable').DataTable();
+        const nextCode = generateItemCode(table);
+        $('#displayItemCode').text(nextCode);
+        populateSupplierDropdown();
+        $('#newSupplierInfo').hide();
         $('#addModal').modal('show');
-    }
-
-    function fillSupplierInfo() {
-        // This would be populated from database in a real app
-        var supplierId = $('#existingSupplier').val();
-        if (supplierId === "1") {
-            $('#supplierName').val("Supplement King Sdn Bhd");
-            $('#supplierPhone').val("03-12345678");
-            $('#supplierEmail').val("info@supplementking.com");
-            $('#picName').val("Ali bin Ahmad");
-            $('#picPhone').val("012-3456789");
-        } else if (supplierId === "2") {
-            $('#supplierName').val("Gym Gear Malaysia");
-            $('#supplierPhone').val("03-98765432");
-            $('#supplierEmail').val("sales@gymgear.com");
-            $('#picName').val("Siti binti Mohd");
-            $('#picPhone').val("019-8765432");
-        } else if (supplierId === "3") {
-            $('#supplierName').val("Fitness Apparel Co.");
-            $('#supplierPhone').val("03-55556666");
-            $('#supplierEmail').val("contact@fitnessapparel.com");
-            $('#picName').val("Raj Kumar");
-            $('#picPhone').val("011-22334455");
-        } else if (supplierId === "4") {
-            // Clear fields for new supplier
-            $('#supplierName').val("");
-            $('#supplierPhone').val("");
-            $('#supplierEmail').val("");
-            $('#picName').val("");
-            $('#picPhone').val("");
-        }
     }
 
     function editEntry(itemCode) {
@@ -593,9 +821,7 @@ $currentPage = 'inventory';
             $('#editQuantity').val(entry.quantity);
             $('#editPrice').val(entry.price);
             $('#editCategory').val(entry.category);
-            $('#editSupplier').val(entry.supplierName === "Supplement King Sdn Bhd" ? "1" : 
-                                  entry.supplierName === "Gym Gear Malaysia" ? "2" : 
-                                  entry.supplierName === "Fitness Apparel Co." ? "3" : "4");
+            $('#editSupplier').val(entry.supplierId);
             
             $('#editModal').modal('show');
         }
@@ -619,7 +845,6 @@ $currentPage = 'inventory';
             cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Find and remove the item
                 const index = data.findIndex(i => i.itemCode === itemCode);
                 if (index !== -1) {
                     table.row(index).remove().draw();
@@ -633,71 +858,6 @@ $currentPage = 'inventory';
             }
         });
     }
-
-    function generateItemCode() {
-        const table = $('#inventoryTable').DataTable();
-        const data = table.data().toArray();
-        
-        // If no items exist, start with ITM001
-        if (data.length === 0) return 'ITM001';
-        
-        // Get all numeric parts of item codes
-        const codes = data.map(item => {
-            const match = item.itemCode.match(/\d+$/); // Get numbers at end
-            return match ? parseInt(match[0]) : 0;
-        });
-        
-        // Find highest number and increment
-        const maxCode = Math.max(...codes);
-        return 'ITM' + String(maxCode + 1).padStart(3, '0');
-    }
-
-    function openAddModal() {
-        // Generate and display the next item code
-        const nextCode = generateItemCode();
-        $('#displayItemCode').text(nextCode);
-        
-        // Clear other form fields
-        $('#addForm')[0].reset();
-        
-        // Show the modal
-        $('#addModal').modal('show');
-    }
-
-    // Update the add item function
-    $('#addItemBtn').click(function() {
-        if ($('#addForm')[0].checkValidity()) {
-            const table = $('#inventoryTable').DataTable();
-            const newItemCode = $('#displayItemCode').text(); // Get the generated code
-            
-            const newItem = {
-                itemCode: newItemCode,
-                itemName: $('#addItemName').val(),
-                quantity: parseInt($('#addQuantity').val()),
-                price: parseFloat($('#addPrice').val()),
-                category: $('#addCategory').val(),
-                supplierName: $('#existingSupplier').val() === "4" ? 
-                    $('#supplierName').val() : $('#existingSupplier option:selected').text()
-            };
-
-            // Add to DataTable
-            table.row.add(newItem).draw();
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Item Added',
-                text: 'The new inventory item has been added successfully',
-                timer: 2000,
-                showConfirmButton: false
-            });
-            
-            // Reset form and close modal
-            $('#addForm')[0].reset();
-            $('#addModal').modal('hide');
-        } else {
-            $('#addForm')[0].reportValidity();
-        }
-    });
 </script>
 </body>
 </html>
