@@ -137,7 +137,7 @@
 <!-- Modal Wrapper -->
 <div class="modal-overlay" id="itemModal">
   <div class="modal-content">
-    <button class="close-button" onclick="document.getElementById('itemModal').style.display='none'">×</button>
+    <button class="close-button" onclick="closeModal()">×</button>
 
     <form action="https://formbold.com/s/FORM_ID" method="POST">
       <label class="formbold-form-section-title">Add New Item</label>
@@ -212,7 +212,7 @@
       </table>
 
       <div class="form-actions">
-        <button type="button" class="formbold-btn btn-cancel" onclick="document.getElementById('itemModal').style.display='none'">Cancel</button>
+        <button type="button" class="formbold-btn btn-cancel" onclick="closeModal()">Cancel</button>
         <button type="submit" class="formbold-btn btn-submit">Add Item</button>
       </div>
     </form>
