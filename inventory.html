@@ -3,6 +3,9 @@
 <head>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
+    html {
+  overflow-y: scroll; /* Always shows scrollbar */
+  }
     body {
       font-family: "Poppins", sans-serif;
       background: #f2f2f2;
@@ -131,6 +134,13 @@
             </div>
             <input type="submit" name="Submit" value="Search">
         </div>
+        <div class = "Add Item">
+          <button style="padding: 10px 20px; margin-top: 20px; background: #4070f4; color: white; border: none; border-radius: 5px; cursor: pointer;"
+          onclick="openAddItemModal()">
+         + Add New Item
+          </button>
+          <div id="modalContainer"></div>
+        </div>
         </div>
         <div class="wrapper">
             <div class="overlay">
@@ -237,7 +247,7 @@
         </form>
         </div>
     </div>
-            <script>
+          <script>
             let selectedRow;
 
             function confirmDelete() {
@@ -266,6 +276,32 @@
             cells[3].innerText = document.getElementById("editPrice").value;
             cells[4].innerText = document.getElementById("editSupplier").value;
             closeEditModal();
+            }
+
+            function openAddItemModal() {
+              fetch('configureInventory.html')
+                .then(response => response.text())
+                .then(html => {
+                  document.getElementById('modalContainer').innerHTML = html;
+                  document.getElementById('itemModal').style.display = 'flex';
+
+                  // Fix scrollbar shift issue
+                  const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+                  document.body.style.paddingRight = scrollBarWidth + 'px';
+                  document.body.style.overflow = 'hidden';
+                })
+                .catch(err => {
+                  console.error('Error loading modal:', err);
+                });
+            }
+
+            function closeModal() {
+              const modal = document.getElementById('itemModal');
+              if (modal) modal.style.display = 'none';
+
+              // Revert scrollbar fix
+              document.body.style.overflow = '';
+              document.body.style.paddingRight = '';
             }
         </script>
     </body>
