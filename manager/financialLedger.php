@@ -7,27 +7,28 @@ $currentPage = 'finance';
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title><?php browsertitle(); ?></title>
   <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback" />
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="../app/plugins/fontawesome-free/css/all.min.css"/>
+  <link rel="stylesheet" href="../app/plugins/fontawesome-free/css/all.min.css" />
   <!-- DataTables -->
   <link rel="stylesheet" href="../app/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
   <link rel="stylesheet" href="../app/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
   <!-- SweetAlert2 -->
   <link rel="stylesheet" href="../app/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
   <!-- overlayScrollbars -->
-  <link rel="stylesheet" href="../app/plugins/overlayScrollbars/css/OverlayScrollbars.min.css"/>
+  <link rel="stylesheet" href="../app/plugins/overlayScrollbars/css/OverlayScrollbars.min.css" />
   <!-- Theme style -->
   <link rel="stylesheet" href="../app/dist/css/adminlte.min.css" />
   <style>
     .content-wrapper {
       background-color: #f8fafc;
     }
-    
+
     .ledger-header {
       display: flex;
       justify-content: space-between;
@@ -35,13 +36,13 @@ $currentPage = 'finance';
       margin-bottom: 20px;
       padding: 0 10px;
     }
-    
+
     .ledger-title {
       color: #2d3748;
       font-size: 1.8rem;
       font-weight: 600;
     }
-    
+
     .export-btn {
       background-color: #4299e1;
       color: white;
@@ -53,11 +54,11 @@ $currentPage = 'finance';
       align-items: center;
       gap: 8px;
     }
-    
+
     .export-btn:hover {
       background-color: #3182ce;
     }
-    
+
     .action-btn {
       display: inline-flex;
       align-items: center;
@@ -67,69 +68,70 @@ $currentPage = 'finance';
       cursor: pointer;
       margin: 0 2px;
     }
-    
+
     .edit-btn {
       background-color: #4299e1;
       color: white;
     }
-    
+
     .edit-btn:hover {
       background-color: #3182ce;
     }
-    
+
     .delete-btn {
       background-color: #f56565;
       color: white;
     }
-    
+
     .delete-btn:hover {
       background-color: #e53e3e;
     }
-    
+
     table.dataTable tbody tr:hover {
       background-color: #ebf8ff !important;
     }
-    
+
     .modal-content {
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    
+
     .modal-header {
       font-size: 1.25rem;
       font-weight: 600;
       padding: 16px 20px;
       border-bottom: 1px solid #e2e8f0;
     }
-    
+
     .modal-body {
       padding: 20px;
     }
-    
+
     .modal-footer {
       border-top: 1px solid #e2e8f0;
       padding: 16px 20px;
     }
-    
+
     .readonly-section {
       padding-bottom: 15px;
       margin-bottom: 15px;
       border-bottom: 1px solid #e2e8f0;
     }
-    
+
     .readonly-field {
       background-color: #f8f9fa;
       padding: 8px;
       border-radius: 4px;
       margin-bottom: 10px;
     }
-    
+
     .form-required label:after {
       content: " *";
       color: #e53e3e;
     }
   </style>
 </head>
+
 <body class="hold-transition sidebar-mini layout-fixed">
   <!-- Site wrapper -->
   <div class="wrapper">
@@ -169,17 +171,16 @@ $currentPage = 'finance';
                   <i class="fas fa-download"></i> Export
                 </button>
               </div>
-              
+
               <table id="ledgerTable" class="table table-bordered table-hover">
                 <thead>
                   <tr>
                     <th>No.</th>
-                    <th>Ledger ID</th>
-                    <th>Ledger Name</th>
                     <th>Payment ID</th>
                     <th>Date</th>
+                    <th>Payment Amount</th>
+                    <th>Payment Method</th>
                     <th>Type</th>
-                    <th>Amount (RM)</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -262,15 +263,10 @@ $currentPage = 'finance';
               </div>
             </div>
           </div>
-          
+
           <form id="editForm">
-            <div class="row"> 
-              <div class="col-md-6">
-                <div class="form-group form-required">
-                  <label for="editLedgerName">Ledger Name</label>
-                  <input type="text" class="form-control" id="editLedgerName" required>
-                </div>
-              </div>
+            <div class="row">
+
               <div class="col-md-6">
                 <div class="form-group form-required">
                   <label for="editType">Type</label>
@@ -281,8 +277,8 @@ $currentPage = 'finance';
                 </div>
               </div>
             </div>
-            
-            <div class="row"> 
+
+            <div class="row">
               <div class="col-md-6">
                 <div class="form-group form-required">
                   <label for="editPaymentMethod">Payment Method</label>
@@ -301,7 +297,7 @@ $currentPage = 'finance';
                 </div>
               </div>
             </div>
-            
+
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
@@ -310,7 +306,7 @@ $currentPage = 'finance';
                 </div>
               </div>
             </div>
-            
+
           </form>
         </div>
         <div class="modal-footer">
@@ -343,96 +339,83 @@ $currentPage = 'finance';
     $(document).ready(function() {
       // DataTable
       var table = $('#ledgerTable').DataTable({
-        "data": [
-          { 
-            ledgerID: "L001", 
-            ledgerName: "Jan Membership", 
-            paymentID: "P001", 
-            date: "2025-01-02", 
-            type: "Membership", 
+        "data": [{
+            paymentID: "P001",
+            date: "2025-07-01",
+            amount: 15.00,
+            paymentMethod: "E-Wallet",
+            type: "Merchandise",
+            discount: 0,
+            createdBy: "John Doe"
+          },
+          {
+            paymentID: "P002",
+            date: "2025-07-02",
+            amount: 7.00,
+            paymentMethod: "E-Wallet",
+            type: "Merchandise",
+            discount: 0,
+            createdBy: "John Doe"
+          },
+          {
+            paymentID: "P003",
+            date: "2025-07-03",
+            amount: 35.00,
+            paymentMethod: "Credit/Debit Card",
+            type: "Merchandise",
+            discount: 0,
+            createdBy: "Jane Smith"
+          },
+          {
+            paymentID: "P004",
+            date: "2025-07-04",
             amount: 100.00,
-            paymentMethod: "card",
-            discount: 0.00,
-            createdBy: "John Doe"
-          },
-          { 
-            ledgerID: "L002", 
-            ledgerName: "Protein Purchase", 
-            paymentID: "P002", 
-            date: "2025-01-03", 
-            type: "expense", 
-            amount: 80.00,
-            paymentMethod: "transfer",
-            discount: 5.00,
-            createdBy: "John Doe"
-          },
-          { 
-            ledgerID: "L003", 
-            ledgerName: "Feb Maintenance", 
-            paymentID: "P003", 
-            date: "2025-02-10", 
-            type: "expense", 
-            amount: 150.00,
-            paymentMethod: "cash",
-            discount: 0.00,
+            paymentMethod: "Cash",
+            type: "Membership",
+            discount: 0,
             createdBy: "Jane Smith"
-          },
-          { 
-            ledgerID: "L004", 
-            ledgerName: "March Income", 
-            paymentID: "P004", 
-            date: "2025-03-15", 
-            type: "income", 
-            amount: 200.00,
-            paymentMethod: "transfer",
-            discount: 0.00,
-            createdBy: "Jane Smith"
-          },
-          { 
-            ledgerID: "L005", 
-            ledgerName: "Jan Walk-In", 
-            paymentID: "P005", 
-            date: "2025-01-05", 
-            type: "payment", 
-            amount: 50.00,
-            paymentMethod: "cash",
-            discount: 0.00,
-            createdBy: "John Doe"
           }
         ],
-        "columns": [
-          { 
+        "columns": [{
             "data": null,
             "render": function(data, type, row, meta) {
               return meta.row + 1;
             }
           },
-          { "data": "ledgerID" },
-          { "data": "ledgerName" },
-          { "data": "paymentID" },
-          { "data": "date" },
-          { "data": "type" },
-          { 
+          {
+            "data": "paymentID"
+          },
+          {
+            "data": "date"
+          },
+          {
             "data": "amount",
             "render": function(data) {
               return 'RM ' + data.toFixed(2);
             }
           },
           {
+            "data": "paymentMethod"
+          },
+          {
+            "data": "type"
+          },
+          {
             "data": null,
             "render": function(data) {
               return `
-                <button class="action-btn edit-btn" onclick="editEntry('${data.ledgerID}')">
-                  <i class="fas fa-pencil-alt"></i>
-                </button>
-                <button class="action-btn delete-btn" onclick="deleteEntry('${data.ledgerID}', '${data.ledgerName}')">
-                  <i class="fas fa-trash"></i>
-                </button>
-              `;
+        <button class="action-btn edit-btn" onclick="editEntry('${data.paymentID}')">
+          <i class="fas fa-pencil-alt"></i>
+        </button>
+        <button class="action-btn delete-btn" onclick="deleteEntry('${data.paymentID}', '${data.paymentID}')">
+          <i class="fas fa-trash"></i>
+        </button>
+      `;
             },
             "orderable": false
           }
         ],
+
         "responsive": true,
         "autoWidth": false,
         "pageLength": 10,
@@ -451,7 +434,7 @@ $currentPage = 'finance';
       // Save changes 
       $('#saveChangesBtn').click(function() {
         if ($('#editForm')[0].checkValidity()) {
-          
+
           Swal.fire({
             icon: 'success',
             title: 'Changes Saved',
@@ -459,8 +442,8 @@ $currentPage = 'finance';
             timer: 2000,
             showConfirmButton: false
           });
-          
-          
+
+
           $('#editModal').modal('hide');
         } else {
           $('#editForm')[0].reportValidity();
@@ -468,29 +451,25 @@ $currentPage = 'finance';
       });
     });
 
-    function editEntry(ledgerID) {
-    
-    var table = $('#ledgerTable').DataTable();
-    var data = table.data().toArray();
-    var entry = data.find(item => item.ledgerID === ledgerID);
-    
-    if (entry) {
-      // Populate the readonly fields
-      $('#editPaymentId').text(entry.paymentID);
-      $('#editCreatedDate').text(entry.date);
-      $('#editCreatedBy').text(entry.createdBy);
-      
-      // Populate the editable fields
-      $('#editLedgerName').val(entry.ledgerName);
-      $('#editType').val(entry.type === 'payment' ? 'membership' : 'merchandise');
-      $('#editPaymentMethod').val(entry.paymentMethod);
-      $('#editAmount').val(entry.amount);
-      $('#editDiscount').val(entry.discount || '');
-      
-      // Show the modal
-      $('#editModal').modal('show');
+    function editEntry(paymentID) {
+      var table = $('#ledgerTable').DataTable();
+      var data = table.data().toArray();
+      var entry = data.find(item => item.paymentID === paymentID);
+
+      if (entry) {
+        $('#editPaymentId').text(entry.paymentID);
+        $('#editCreatedDate').text(entry.date);
+        $('#editCreatedBy').text(entry.createdBy);
+
+        $('#editType').val(entry.type);
+        $('#editPaymentMethod').val(entry.paymentMethod);
+        $('#editAmount').val(entry.amount);
+        $('#editDiscount').val(entry.discount || '');
+
+        $('#editModal').modal('show');
+      }
     }
-  }
+
 
     function deleteEntry(ledgerID, ledgerName) {
       Swal.fire({
@@ -504,13 +483,13 @@ $currentPage = 'finance';
         cancelButtonText: 'Cancel'
       }).then((result) => {
         if (result.isConfirmed) {
-          
+
           Swal.fire(
             'Deleted!',
             'The ledger entry has been deleted.',
             'success'
           );
-          
+
         }
       });
     }
@@ -538,25 +517,26 @@ $currentPage = 'finance';
       }
 
       let table = `<div class="table-responsive"><table class="table table-bordered">
-        <thead><tr>
-          <th>No.</th><th>Ledger ID</th><th>Name</th><th>Payment ID</th><th>Date</th><th>Type</th><th>Amount (RM)</th>
-        </tr></thead><tbody>`;
-      
+  <thead><tr>
+    <th>No.</th><th>Payment ID</th><th>Date</th><th>Type</th><th>Payment Method</th><th>Amount (RM)</th>
+  </tr></thead><tbody>`;
+
       filtered.forEach((item, i) => {
         table += `<tr>
-          <td>${i + 1}</td>
-          <td>${item.ledgerID}</td>
-          <td>${item.ledgerName}</td>
-          <td>${item.paymentID}</td>
-          <td>${item.date}</td>
-          <td>${item.type}</td>
-          <td>${item.amount.toFixed(2)}</td>
-        </tr>`;
+    <td>${i + 1}</td>
+    <td>${item.paymentID}</td>
+    <td>${item.date}</td>
+    <td>${item.type}</td>
+    <td>${item.paymentMethod}</td>
+    <td>${item.amount.toFixed(2)}</td>
+  </tr>`;
       });
-      
+
+
       table += "</tbody></table></div>";
       container.innerHTML = table;
     }
   </script>
 </body>
+
 </html>
