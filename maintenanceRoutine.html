@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Maintenance Routine</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1 id="routineTitle">Maintenance Routine</h1>
+    <button class="btn" onclick="openModal('modal-editSchedule')">Edit Schedule</button>
+    <button class="btn" onclick="openAddItem()">Add Item</button>
+
+    <div class="item-header">
+      <div>Item</div>
+      <div>Days</div>
+      <div>Log/View</div>
+      <div>Actions</div>
+    </div>
+    <div id="itemsContainer"></div>
+  </div>
+
+  <!-- Edit Schedule Modal -->
+  <div class="modal hidden" id="modal-editSchedule">
+    <div class="modal-content">
+      <h2>Edit Schedule</h2>
+      <input type="text" id="editName" placeholder="Schedule Name">
+      <textarea id="editDesc" placeholder="Description"></textarea>
+      <button onclick="saveScheduleEdit()">Save</button>
+      <button class="btn-secondary" onclick="closeModal('modal-editSchedule')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Add/Edit Item Modal -->
+  <div class="modal hidden" id="modal-addItem">
+    <div class="modal-content">
+      <h2 id="itemModalTitle">Add Item</h2>
+      <input type="text" id="itemName" placeholder="Item Name">
+      <div class="calendar">
+        <label><input type="checkbox" value="Mon">Mon</label>
+        <label><input type="checkbox" value="Tue">Tue</label>
+        <label><input type="checkbox" value="Wed">Wed</label>
+        <label><input type="checkbox" value="Thu">Thu</label>
+        <label><input type="checkbox" value="Fri">Fri</label>
+        <label><input type="checkbox" value="Sat">Sat</label>
+        <label><input type="checkbox" value="Sun">Sun</label>
+      </div>
+      <button id="itemSaveBtn">Save</button>
+      <button class="btn-secondary" onclick="closeModal('modal-addItem')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Log Modal -->
+  <div class="modal hidden" id="modal-log">
+    <div class="modal-content">
+      <h2>Log Maintenance</h2>
+      <p id="logItemTitle"></p>
+      <label><input type="checkbox" id="logRecorded"> Is Recorded</label>
+      <button onclick="saveLog()">Save</button>
+      <button class="btn-secondary" onclick="closeModal('modal-log')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- View Log Modal -->
+  <div class="modal hidden" id="modal-viewLog">
+    <div class="modal-content">
+      <h2>View Log</h2>
+      <p id="viewLogTitle"></p>
+      <label><input type="checkbox" id="viewLogRecorded" disabled> Is Recorded</label>
+      <button class="btn-secondary" onclick="closeModal('modal-viewLog')">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const scheduleId = params.get("scheduleId");
+    const schedules = JSON.parse(localStorage.getItem("schedules") || "[]");
+    const schedule = schedules.find(s => s.id === scheduleId);
+    const itemsContainer = document.getElementById("itemsContainer");
+    const routineTitle = document.getElementById("routineTitle");
+
+    let editItemIndex = null;
+    let logItem = null;
+    let logDay = null;
+
+    function init() {
+      if (!schedule) return alert("Schedule not found");
+      routineTitle.textContent = schedule.name;
+      document.getElementById("editName").value = schedule.name;
+      document.getElementById("editDesc").value = schedule.description;
+      renderItems();
+    }
+
+    function renderItems() {
+      itemsContainer.innerHTML = "";
+      schedule.items.forEach((item, i) => {
+        const row = document.createElement("div");
+        row.className = "item-row";
+
+        // Name
+        const name = document.createElement("div");
+        name.textContent = item.name;
+
+        // Days
+        const dayList = document.createElement("div");
+        dayList.textContent = item.days.join(", ");
+
+        // Logs
+        const logCell = document.createElement("div");
+        const cal = document.createElement("div");
+        cal.className = "calendar";
+        ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(day => {
+          const btn = document.createElement("button");
+          if (item.days.includes(day)) {
+            btn.textContent = item.logs?.[day]?.isRecorded ? "View" : "Log";
+            btn.onclick = () => {
+              logItem = item;
+              logDay = day;
+              if (item.logs?.[day]?.isRecorded) openViewLog();
+              else openLog();
+            };
+          } else {
+            btn.textContent = "-";
+            btn.disabled = true;
+          }
+          cal.appendChild(btn);
+        });
+        logCell.appendChild(cal);
+
+        // Actions
+        const actions = document.createElement("div");
+        actions.innerHTML = `
+          <button class="btn-secondary" onclick="editItem(${i})">Edit</button>
+          <button class="btn-danger" onclick="deleteItem(${i})">Delete</button>
+        `;
+
+        row.appendChild(name);
+        row.appendChild(dayList);
+        row.appendChild(logCell);
+        row.appendChild(actions);
+        itemsContainer.appendChild(row);
+      });
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.remove("hidden");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add("hidden");
+    }
+
+    function saveScheduleEdit() {
+      schedule.name = document.getElementById("editName").value;
+      schedule.description = document.getElementById("editDesc").value;
+      save();
+      routineTitle.textContent = schedule.name;
+      closeModal("modal-editSchedule");
+    }
+
+    function openAddItem() {
+      editItemIndex = null;
+      document.getElementById("itemModalTitle").textContent = "Add Item";
+      document.getElementById("itemName").value = "";
+      document.querySelectorAll('#modal-addItem input[type="checkbox"]').forEach(cb => cb.checked = false);
+      document.getElementById("itemSaveBtn").onclick = saveNewItem;
+      openModal("modal-addItem");
+    }
+
+    function saveNewItem() {
+      const name = document.getElementById("itemName").value;
+      const days = [...document.querySelectorAll('#modal-addItem input[type="checkbox"]:checked')].map(cb => cb.value);
+      if (!name || days.length === 0) return alert("Please enter name and select days.");
+      schedule.items.push({ name, days, logs: {} });
+      save();
+      renderItems();
+      closeModal("modal-addItem");
+    }
+
+    function editItem(i) {
+      editItemIndex = i;
+      const item = schedule.items[i];
+      document.getElementById("itemModalTitle").textContent = "Edit Item";
+      document.getElementById("itemName").value = item.name;
+      document.querySelectorAll('#modal-addItem input[type="checkbox"]').forEach(cb => {
+        cb.checked = item.days.includes(cb.value);
+      });
+      document.getElementById("itemSaveBtn").onclick = () => saveEditItem(i);
+      openModal("modal-addItem");
+    }
+
+    function saveEditItem(i) {
+      const name = document.getElementById("itemName").value;
+      const days = [...document.querySelectorAll('#modal-addItem input[type="checkbox"]:checked')].map(cb => cb.value);
+      schedule.items[i].name = name;
+      schedule.items[i].days = days;
+      save();
+      renderItems();
+      closeModal("modal-addItem");
+    }
+
+    function deleteItem(i) {
+      if (confirm("Delete item?")) {
+        schedule.items.splice(i, 1);
+        save();
+        renderItems();
+      }
+    }
+
+    function openLog() {
+      document.getElementById("logItemTitle").textContent = `${logItem.name} - ${logDay}`;
+      document.getElementById("logRecorded").checked = false;
+      openModal("modal-log");
+    }
+
+    function saveLog() {
+      if (!logItem.logs) logItem.logs = {};
+      logItem.logs[logDay] = { isRecorded: document.getElementById("logRecorded").checked };
+      save();
+      closeModal("modal-log");
+      renderItems();
+    }
+
+    function openViewLog() {
+      document.getElementById("viewLogTitle").textContent = `${logItem.name} - ${logDay}`;
+      document.getElementById("viewLogRecorded").checked = logItem.logs[logDay].isRecorded;
+      openModal("modal-viewLog");
+    }
+
+    function save() {
+      localStorage.setItem("schedules", JSON.stringify(schedules));
+    }
+
+    init();
+  </script>
+</body>
+</html>
