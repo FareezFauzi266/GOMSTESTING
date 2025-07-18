@@ -1,18 +1,13 @@
 <?php
-try
-{
-    $user = "root";
-    $pass = "";
-    $dbh = new PDO('mysql:host=localhost;dbname=goms', $user, $pass);
-    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    if ($dbh) {
-        //echo "Connected successfully!";
-    }
-}
-catch (PDOException $e)
-{
-    print "Error!: " . $e->getMessage() . "<br/>";
-    die();
+$host = "localhost";
+$user = "root";
+$pass = "";
+$dbname = "goms";
+
+$conn = new mysqli($host, $user, $pass, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 ?>
