@@ -1,3 +1,64 @@
+<?php
+session_start();
+include("db.php"); // Your DB connection file
+
+// If already logged in, redirect
+if (isset($_SESSION['userID'])) {
+    if ($_SESSION['userRole'] == 'Manager') {
+        header("Location: manager/dashboard.php");
+        exit;
+    } else if ($_SESSION['userRole'] == 'Staff') {
+        header("Location: staff/dashboard.php");
+        exit;
+    }
+}
+
+$login_error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $userID = trim($_POST['UserID'] ?? '');
+    $password = $_POST['userPassword'] ?? '';
+    $userRole = strtolower($_POST['userRole'] ?? '');
+
+    if ($userID && $password && ($userRole == 'manager' || $userRole == 'staff')) {
+        // Prepare query
+        $stmt = $conn->prepare("SELECT userID, userName, userRole, userPassword FROM users WHERE userID = ? AND LOWER(userRole) = ?");
+        $stmt->bind_param("is", $userID, $userRole);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result && $result->num_rows === 1) {
+            $user = $result->fetch_assoc();
+
+            // Verify password
+            if ($password === $user['userPassword']) {
+                // Login success: save session
+                $_SESSION['userID'] = $user['userID'];
+                $_SESSION['userName'] = $user['userName'];
+                $_SESSION['userRole'] = ucfirst($user['userRole']); // e.g., Manager or Staff
+
+                // Redirect based on role
+                if ($_SESSION['userRole'] == 'Manager') {
+                    header("Location: manager/dashboard.php");
+                    exit;
+                } else {
+                    header("Location: staff/dashboard.php");
+                    exit;
+                }
+            } else {
+                $login_error = 'Invalid password.';
+            }
+        } else {
+            $login_error = 'User not found or role mismatch.';
+        }
+
+        $stmt->close();
+    } else {
+        $login_error = 'Please fill all fields correctly.';
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en"> 
 <head>
@@ -100,105 +161,86 @@
 </head> 
 
 <body class="login-page">
-    <div class="login-box">
-        <div class="login-logo">
-            <a>Gym Operational Management System (GOMS)</a>
-        </div> 
-        <div class="card card-wider">
-            <div class="card-body login-card-body">
-                <i class="bi bi-dumbbell gym-icon"></i>
-                <p class="login-box-msg">Login to start your session</p>
 
-                <div class="accordion" id="accordionLogin">
-                    <!-- User Login Accordion -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingUser">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUser" aria-expanded="false" aria-controls="collapseUser">
-                                User Login
-                            </button>
-                        </h2>
-                        <div id="collapseUser" class="accordion-collapse collapse" aria-labelledby="headingUser" data-bs-parent="#accordionLogin">
-                            <div class="accordion-body">
-                                <form id="loginForm" method="post">
-                                    <div class="role-selector">
-                                        <div class="btn-group" role="group">
-                                            <input type="radio" class="btn-check" name="userRole" id="managerRole" value="manager" autocomplete="off" checked>
-                                            <label class="btn btn-outline-primary" for="managerRole">Manager</label>
-                                            
-                                            <input type="radio" class="btn-check" name="userRole" id="staffRole" value="staff" autocomplete="off">
-                                            <label class="btn btn-outline-primary" for="staffRole">Staff</label>
-                                        </div>
+<div class="login-box">
+    <div class="login-logo">
+        <a>Gym Operational Management System (GOMS)</a>
+    </div>
+    <div class="card card-wider">
+        <div class="card-body login-card-body">
+            <i class="bi bi-dumbbell gym-icon"></i>
+            <p class="login-box-msg">Login to start your session</p>
+
+            <div class="accordion" id="accordionLogin">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingUser">
+                        <button class="accordion-button <?php if (!$login_error) echo 'collapsed'; ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUser" aria-expanded="<?php echo $login_error ? 'true' : 'false'; ?>" aria-controls="collapseUser">
+                            User Login
+                        </button>
+                    </h2>
+                    <div id="collapseUser" class="accordion-collapse collapse <?php if ($login_error) echo 'show'; ?>" aria-labelledby="headingUser" data-bs-parent="#accordionLogin">
+                        <div class="accordion-body">
+                            <form id="loginForm" method="post" novalidate>
+                                <div class="role-selector">
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="userRole" id="managerRole" value="manager" autocomplete="off" <?php if (!isset($_POST['userRole']) || $_POST['userRole'] == 'manager') echo 'checked'; ?>>
+                                        <label class="btn btn-outline-primary" for="managerRole">Manager</label>
+
+                                        <input type="radio" class="btn-check" name="userRole" id="staffRole" value="staff" autocomplete="off" <?php if (isset($_POST['userRole']) && $_POST['userRole'] == 'staff') echo 'checked'; ?>>
+                                        <label class="btn btn-outline-primary" for="staffRole">Staff</label>
                                     </div>
-                                    
-                                    <div class="input-group mb-3">
-                                        <input type="text" class="form-control" placeholder="User ID" name="UserID" id="userId" required>
-                                        <div class="input-group-text">
-                                            <span class="bi bi-person"></span>
-                                        </div>
+                                </div>
+
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" placeholder="User ID" name="UserID" id="userId" required value="<?php echo htmlspecialchars($_POST['UserID'] ?? ''); ?>">
+                                    <div class="input-group-text">
+                                        <span class="bi bi-person"></span>
                                     </div>
-                                    <div class="input-group mb-3">
-                                        <input type="password" class="form-control" placeholder="Password" name="userPassword" id="userPassword" required>
-                                        <div class="input-group-text">
-                                            <span class="bi bi-eye-slash" id="togglePassword" title="Show Password" style="cursor: pointer;"></span>
-                                        </div>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <input type="password" class="form-control" placeholder="Password" name="userPassword" id="userPassword" required>
+                                    <div class="input-group-text">
+                                        <span class="bi bi-eye-slash" id="togglePassword" title="Show Password" style="cursor: pointer;"></span>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <div class="login-btn-container">
-                                                <button class="btn text-white rounded-pill shadow-sm py-2 px-4" type="submit" name="login" id="loginBtn">Login</button>
-                                            </div>
-                                        </div> 
-                                    </div> 
-                                </form>
-                            </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 login-btn-container">
+                                        <button class="btn text-white rounded-pill shadow-sm py-2 px-4" type="submit" name="login" id="loginBtn">Login</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <?php if ($login_error): ?>
+                                <script>
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Login Failed',
+                                        text: '<?php echo addslashes($login_error); ?>',
+                                        timer: 3000,
+                                        showConfirmButton: false
+                                    });
+                                </script>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
-            </div> 
+            </div>
+
         </div>
-    </div> 
+    </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Password toggle functionality
-        document.getElementById("togglePassword").addEventListener("click", function () {
-            const passwordField = document.getElementById("userPassword");
-            const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
-            passwordField.setAttribute("type", type);
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Password toggle functionality
+    document.getElementById("togglePassword").addEventListener("click", function () {
+        const passwordField = document.getElementById("userPassword");
+        const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
+        passwordField.setAttribute("type", type);
 
-            this.classList.toggle("bi-eye");
-            this.classList.toggle("bi-eye-slash");
-        });
+        this.classList.toggle("bi-eye");
+        this.classList.toggle("bi-eye-slash");
+    });
+</script>
 
-        // Form submission handler
-        document.getElementById("loginForm").addEventListener("submit", function(e) {
-            e.preventDefault();
-            
-            const userId = document.getElementById("userId").value;
-            const password = document.getElementById("userPassword").value;
-            const userRole = document.querySelector('input[name="userRole"]:checked').value;
-            
-            // Simulate login - in a real app, this would be a server-side check
-            Swal.fire({
-                title: 'Logging in...',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                    
-                    // Simulate API call delay
-                    setTimeout(() => {
-                        Swal.close();
-                        
-                        // Redirect based on role
-                        if (userRole === 'manager') {
-                            window.location.href = 'manager/dashboard.php';
-                        } else {
-                            window.location.href = 'staff/dashboard.php';
-                        }
-                    }, 1500);
-                }
-            });
-        });
-    </script>
 </body>
 </html>
