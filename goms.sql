@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Jul 18, 2025 at 07:50 AM
+-- Generation Time: Jul 18, 2025 at 09:24 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -54,7 +54,19 @@ CREATE TABLE IF NOT EXISTS `inventoryitem` (
   `itemSupplierID` int(11) DEFAULT NULL,
   PRIMARY KEY (`itemCode`),
   KEY `itemSupplierID` (`itemSupplierID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7007 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `inventoryitem`
+--
+
+INSERT INTO `inventoryitem` (`itemCode`, `itemName`, `itemQuantity`, `itemPrice`, `itemCategory`, `itemSupplierID`) VALUES
+(7001, 'Gym Membership - Basic', 50, 150.00, 'membership', 6),
+(7002, 'Gym T-Shirt', 200, 15.00, 'merchandise', 4),
+(7003, 'Protein Powder', 75, 80.00, 'supplements', 5),
+(7004, 'Energy Bar Pack', 150, 10.00, 'supplements', 5),
+(7005, 'Water Bottle', 168, 12.00, 'merchandise', 4),
+(7006, 'Resistance Bands', 90, 20.00, 'equipment', 2);
 
 -- --------------------------------------------------------
 
@@ -91,7 +103,14 @@ CREATE TABLE IF NOT EXISTS `logpayment` (
   `discount` int(11) DEFAULT 0,
   PRIMARY KEY (`paymentID`),
   KEY `userID` (`userID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9002 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `logpayment`
+--
+
+INSERT INTO `logpayment` (`paymentID`, `userID`, `createdAt`, `paymentAmount`, `paymentMethod`, `transactionType`, `discount`) VALUES
+(9001, 1, '2025-07-18 15:14:18', 126.72, 'E-Wallet', 'merchandise', 12);
 
 -- --------------------------------------------------------
 
@@ -163,7 +182,19 @@ CREATE TABLE IF NOT EXISTS `supplier` (
   `supplierPICName` varchar(100) DEFAULT NULL,
   `supplierPICNumber` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`supplierID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `supplier`
+--
+
+INSERT INTO `supplier` (`supplierID`, `supplierName`, `supplierContactNumber`, `supplierEmail`, `supplierAddress`, `supplierPICName`, `supplierPICNumber`) VALUES
+(1, 'FitPro Supplies', '012-3456789', 'contact@fitpro.com', '123 Fitness St, Kuala Lumpur, Malaysia', 'John Tan', '012-9876543'),
+(2, 'Healthy Essentials', '013-4567890', 'sales@healthyessentials.my', '456 Wellness Ave, Selangor, Malaysia', 'Lisa Wong', '013-8765432'),
+(3, 'NutriPlus Distributors', '014-5678901', 'info@nutriplus.com.my', '789 Nutrition Blvd, Penang, Malaysia', 'Ahmad Faiz', '014-7654321'),
+(4, 'GymGear Supplies', '015-6789012', 'support@gymgear.my', '321 Power Rd, Johor Bahru, Malaysia', 'Siti Rahmah', '015-6543210'),
+(5, 'Elite Sports Equip', '016-7890123', 'contact@elitesports.com', '654 Champion Ln, Melaka, Malaysia', 'Michael Lee', '016-5432109'),
+(6, 'Spartan Gym and Fitness', '017-805 5323', 'contact@spartangym.com', 'Damansara Damai, 47810 Petaling Jaya, Selangor', 'Sufhian', '017-805 5323');
 
 -- --------------------------------------------------------
 
@@ -179,7 +210,14 @@ CREATE TABLE IF NOT EXISTS `users` (
   `userEmail` varchar(100) DEFAULT NULL,
   `userPassword` varchar(255) NOT NULL,
   PRIMARY KEY (`userID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`userID`, `userName`, `userRole`, `userEmail`, `userPassword`) VALUES
+(1, 'gomsManager', 'Manager', 'anyemail@gmail.com', 'goms123');
 
 --
 -- Constraints for dumped tables
