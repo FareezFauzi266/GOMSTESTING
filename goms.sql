@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jul 18, 2025 at 09:02 PM
+-- Generation Time: Jul 19, 2025 at 01:36 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -109,8 +109,16 @@ CREATE TABLE `maintenanceitem` (
   `maintainedItemID` varchar(10) NOT NULL,
   `scheduleID` varchar(10) NOT NULL,
   `itemCode` int(11) NOT NULL,
-  `frequencyDays` int(11) NOT NULL
+  `daysOfWeek` varchar(7) NOT NULL DEFAULT '-------'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `maintenanceitem`
+--
+
+INSERT INTO `maintenanceitem` (`maintainedItemID`, `scheduleID`, `itemCode`, `daysOfWeek`) VALUES
+('MID001', 'MTB001', 7006, 'M-W-F-U'),
+('MID002', 'MTB001', 7001, 'MT-HF--');
 
 -- --------------------------------------------------------
 
@@ -127,6 +135,18 @@ CREATE TABLE `maintenancerecord` (
   `remarks` text DEFAULT NULL,
   `attachmentPath` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `maintenancerecord`
+--
+
+INSERT INTO `maintenancerecord` (`recordID`, `maintainedItemID`, `userID`, `maintenanceDate`, `itemCondition`, `remarks`, `attachmentPath`) VALUES
+('R001', 'MID001', 2, '2025-07-14', 'Needs Repair', 'hehe', NULL),
+('R002', 'MID001', 2, '2025-07-16', 'OK', 'hehe', NULL),
+('R003', 'MID001', 2, '2025-07-18', 'OK', 'hhhh', NULL),
+('R004', 'MID002', 2, '2025-07-14', 'OK', 'hehe123', NULL),
+('R005', 'MID002', 2, '2025-07-15', 'OK', 'heehe123321', '/uploads/maintenance/ATT_687ac266d3ee5_Screenshot 2025-07-19 at 3.53.55 AM.png'),
+('R006', 'MID002', 2, '2025-07-17', 'OK', 'huhu', '/uploads/maintenance/ATT_R006.png');
 
 -- --------------------------------------------------------
 
@@ -147,7 +167,7 @@ CREATE TABLE `maintenanceschedule` (
 --
 
 INSERT INTO `maintenanceschedule` (`scheduleID`, `scheduleName`, `createdBy`, `createdAt`, `scheduleDesc`) VALUES
-('MTB8423', 'Basic Maintenance', 2, '2025-07-19', 'For basic stuffs');
+('MTB001', 'Electrical Items', 2, '2025-07-19', 'Maintenance for Electrical Items');
 
 -- --------------------------------------------------------
 
