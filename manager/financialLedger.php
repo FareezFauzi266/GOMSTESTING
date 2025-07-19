@@ -1,10 +1,45 @@
 <?php
 session_start();
 include("../header&footer/settings.php");
-//include(function/function.php);
+include("../connection/connection.php"); // uses $dbh from PDO
 $currentPage = 'finance';
 
+// AJAX: Update ledger entry
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'update') {
+  $data = json_decode(file_get_contents('php://input'), true);
+
+  // Get the values from request
+  $paymentID = $data['paymentID'];
+  $type = strtolower($data['type']);
+  $paymentMethod = $data['paymentMethod'];
+  $amount = $data['amount'];
+  $discount = $data['discount'];
+
+  // Prepare and execute update query
+  $stmt = $dbh->prepare("UPDATE logPayment SET transactionType = ?, paymentMethod = ?, paymentAmount = ?, discount = ? WHERE paymentID = ?");
+  $success = $stmt->execute([$type, $paymentMethod, $amount, $discount, $paymentID]);
+
+  header('Content-Type: application/json');
+
+  echo json_encode(['success' => $success]);
+  exit;
+}
+// Fetch all logPayment records joined with users
+$payments = [];
+try {
+  $stmt = $dbh->prepare("
+        SELECT l.*, u.userName 
+        FROM logPayment l 
+        JOIN users u ON l.userID = u.userID 
+        ORDER BY l.createdAt DESC
+    ");
+  $stmt->execute();
+  $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+  die("Query error: " . $e->getMessage());
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -25,6 +60,7 @@ $currentPage = 'finance';
   <!-- Theme style -->
   <link rel="stylesheet" href="../app/dist/css/adminlte.min.css" />
   <style>
+    /* Your existing styles remain unchanged */
     .content-wrapper {
       background-color: #f8fafc;
     }
@@ -185,7 +221,7 @@ $currentPage = 'finance';
                   </tr>
                 </thead>
                 <tbody>
-                  <!-- Data will be loaded via DataTables -->
+                  <!-- Data loaded dynamically -->
                 </tbody>
               </table>
             </div>
@@ -213,12 +249,18 @@ $currentPage = 'finance';
         <div class="modal-body">
           <div class="form-group">
             <label for="periodSelect">Select Accounting Period:</label>
-            <select id="periodSelect" class="form-control" onchange="filterExportTable()">
+            <select id="periodSelect" class="form-control" onchange="toggleDateInputs()">
               <option value="">-- Select --</option>
               <option value="daily">Daily</option>
               <option value="monthly">Monthly</option>
               <option value="yearly">Yearly</option>
             </select>
+            <div id="dateInputs" class="mb-3">
+              <input type="date" id="dailyInput" class="form-control" style="display:none;" />
+              <input type="month" id="monthInput" class="form-control" style="display:none;" />
+              <input type="number" id="yearInput" class="form-control" min="2000" max="2099" placeholder="Enter year (e.g. 2025)" style="display:none;" />
+            </div>
+            <button onclick="filterExportTable()" class="btn btn-primary">Filter</button>
           </div>
           <div id="filteredTableContainer" class="mt-3"></div>
         </div>
@@ -272,6 +314,7 @@ $currentPage = 'finance';
                   <label for="editType">Type</label>
                   <select class="form-control" id="editType" required>
                     <option value="membership">Membership</option>
+                    <option value="supplements">Supplements</option>
                     <option value="merchandise">Merchandise</option>
                   </select>
                 </div>
@@ -282,12 +325,13 @@ $currentPage = 'finance';
               <div class="col-md-6">
                 <div class="form-group form-required">
                   <label for="editPaymentMethod">Payment Method</label>
-                  <select class="form-control" id="editPaymentMethod" required>
-                    <option value="cash">Cash</option>
-                    <option value="card">Credit/Debit Card</option>
-                    <option value="transfer">Bank Transfer</option>
-                    <option value="ewallet">E-Wallet</option>
+                  <select id="editPaymentMethod" class="form-control" name="paymentMethod" required>
+                    <option value="Cash">Cash</option>
+                    <option value="Credit/Debit Card">Credit/Debit Card</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                    <option value="E-Wallet">E-Wallet</option>
                   </select>
+
                 </div>
               </div>
               <div class="col-md-6">
@@ -336,145 +380,162 @@ $currentPage = 'finance';
   <script src="../app/dist/js/adminlte.min.js"></script>
 
   <script>
+    const ledgerData = <?php echo json_encode(array_map(function ($p) {
+                          return [
+                            'paymentID' => (string) $p['paymentID'],  // convert to string
+                            'date' => $p['createdAt'],
+                            'amount' => floatval($p['paymentAmount']),
+                            'paymentMethod' => $p['paymentMethod'],
+                            'type' => ucfirst($p['transactionType']),
+                            'discount' => isset($p['discount']) ? floatval($p['discount']) : 0,
+                            'createdBy' => $p['userName']
+                          ];
+                        }, $payments)); ?>;
+
     $(document).ready(function() {
-      // DataTable
-      var table = $('#ledgerTable').DataTable({
-        "data": [{
-            paymentID: "P001",
-            date: "2025-07-01",
-            amount: 15.00,
-            paymentMethod: "E-Wallet",
-            type: "Merchandise",
-            discount: 0,
-            createdBy: "John Doe"
+      const table = $('#ledgerTable').DataTable({
+        data: ledgerData,
+        columns: [{
+            data: null,
+            render: (data, type, row, meta) => meta.row + 1
           },
           {
-            paymentID: "P002",
-            date: "2025-07-02",
-            amount: 7.00,
-            paymentMethod: "E-Wallet",
-            type: "Merchandise",
-            discount: 0,
-            createdBy: "John Doe"
+            data: 'paymentID'
           },
           {
-            paymentID: "P003",
-            date: "2025-07-03",
-            amount: 35.00,
-            paymentMethod: "Credit/Debit Card",
-            type: "Merchandise",
-            discount: 0,
-            createdBy: "Jane Smith"
+            data: 'date'
           },
           {
-            paymentID: "P004",
-            date: "2025-07-04",
-            amount: 100.00,
-            paymentMethod: "Cash",
-            type: "Membership",
-            discount: 0,
-            createdBy: "Jane Smith"
-          }
-        ],
-        "columns": [{
-            "data": null,
-            "render": function(data, type, row, meta) {
-              return meta.row + 1;
-            }
+            data: 'amount',
+            render: data => 'RM ' + data.toFixed(2)
           },
           {
-            "data": "paymentID"
+            data: 'paymentMethod'
           },
           {
-            "data": "date"
+            data: 'type'
           },
           {
-            "data": "amount",
-            "render": function(data) {
-              return 'RM ' + data.toFixed(2);
-            }
-          },
-          {
-            "data": "paymentMethod"
-          },
-          {
-            "data": "type"
-          },
-          {
-            "data": null,
-            "render": function(data) {
+            data: null,
+            orderable: false,
+            render: function(data) {
               return `
-        <button class="action-btn edit-btn" onclick="editEntry('${data.paymentID}')">
-          <i class="fas fa-pencil-alt"></i>
-        </button>
-        <button class="action-btn delete-btn" onclick="deleteEntry('${data.paymentID}', '${data.paymentID}')">
-          <i class="fas fa-trash"></i>
-        </button>
-      `;
-            },
-            "orderable": false
+              <button class="action-btn edit-btn" onclick="editEntry('${data.paymentID}')">
+                <i class="fas fa-pencil-alt"></i>
+              </button>
+              <button class="action-btn delete-btn" onclick="deleteEntry('${data.paymentID}', '${data.paymentID}')">
+                <i class="fas fa-trash"></i>
+              </button>
+            `;
+            }
           }
-        ],
-
-        "responsive": true,
-        "autoWidth": false,
-        "pageLength": 10,
-        "language": {
-          "search": "_INPUT_",
-          "searchPlaceholder": "Search...",
-          "lengthMenu": "Show _MENU_ entries",
-          "info": "Showing _START_ to _END_ of _TOTAL_ entries",
-          "paginate": {
-            "previous": "<i class='fas fa-chevron-left'></i>",
-            "next": "<i class='fas fa-chevron-right'></i>"
-          }
-        }
-      });
-
-      // Save changes 
-      $('#saveChangesBtn').click(function() {
-        if ($('#editForm')[0].checkValidity()) {
-
-          Swal.fire({
-            icon: 'success',
-            title: 'Changes Saved',
-            text: 'The ledger entry has been updated successfully',
-            timer: 2000,
-            showConfirmButton: false
-          });
-
-
-          $('#editModal').modal('hide');
-        } else {
-          $('#editForm')[0].reportValidity();
-        }
+        ]
       });
     });
+    $('#saveChangesBtn').click(function() {
+      if ($('#editForm')[0].checkValidity()) {
+        // Collect form data
+        const paymentID = $('#editPaymentId').text();
+        const type = $('#editType').val();
+        const paymentMethod = $('#editPaymentMethod').val();
+        const amount = parseFloat($('#editAmount').val());
+        let discount = parseFloat($('#editDiscount').val());
+        if (isNaN(discount)) discount = 0;
+
+        $.ajax({
+          url: 'financialLedger.php?action=update',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            paymentID,
+            type,
+            paymentMethod,
+            amount,
+            discount
+          }),
+          success: function(response) {
+            if (response.success) {
+              // Update local ledgerData
+              const entryIndex = ledgerData.findIndex(item => item.paymentID === paymentID);
+              if (entryIndex > -1) {
+                ledgerData[entryIndex].type = capitalize(type);
+                ledgerData[entryIndex].paymentMethod = capitalizePaymentMethod(paymentMethod);
+                ledgerData[entryIndex].amount = amount;
+                ledgerData[entryIndex].discount = discount;
+
+                // Refresh DataTable row
+                const table = $('#ledgerTable').DataTable();
+                table.clear().rows.add(ledgerData).draw();
+              }
+
+              Swal.fire({
+                icon: 'success',
+                title: 'Changes Saved',
+                text: 'The ledger entry has been updated successfully',
+                timer: 2000,
+                showConfirmButton: false
+              });
+              $('#editModal').modal('hide');
+            } else {
+              Swal.fire('Error', 'Failed to save changes.', 'error');
+            }
+          },
+          error: function(xhr) {
+            Swal.fire('Error', 'An error occurred: ' + xhr.responseText, 'error');
+          }
+        });
+      } else {
+        $('#editForm')[0].reportValidity();
+      }
+    });
+
+    // Helper functions
+    function capitalize(str) {
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    }
+
+    function capitalizePaymentMethod(str) {
+      if (!str) return '';
+      // Handle known cases (your payment methods)
+      switch (str.toLowerCase()) {
+        case 'cash':
+          return 'Cash';
+        case 'card':
+          return 'Credit/Debit Card';
+        case 'transfer':
+          return 'Bank Transfer';
+        case 'ewallet':
+          return 'E-Wallet';
+        default:
+          return capitalize(str);
+      }
+    }
+    console.log('Editing payment method:', entry.paymentMethod);
 
     function editEntry(paymentID) {
-      var table = $('#ledgerTable').DataTable();
-      var data = table.data().toArray();
-      var entry = data.find(item => item.paymentID === paymentID);
+      const entry = ledgerData.find(item => item.paymentID === paymentID);
+      if (!entry) return;
 
-      if (entry) {
-        $('#editPaymentId').text(entry.paymentID);
-        $('#editCreatedDate').text(entry.date);
-        $('#editCreatedBy').text(entry.createdBy);
+      $('#editPaymentId').text(entry.paymentID);
+      $('#editCreatedDate').text(entry.date);
+      $('#editCreatedBy').text(entry.createdBy);
+      $('#editType').val(entry.type.toLowerCase());
 
-        $('#editType').val(entry.type);
-        $('#editPaymentMethod').val(entry.paymentMethod);
-        $('#editAmount').val(entry.amount);
-        $('#editDiscount').val(entry.discount || '');
+      $('#editPaymentMethod').val(entry.paymentMethod);
 
-        $('#editModal').modal('show');
-      }
+
+      $('#editAmount').val(entry.amount);
+      $('#editDiscount').val(entry.discount || 0);
+
+      $('#editModal').modal('show');
     }
 
 
-    function deleteEntry(ledgerID, ledgerName) {
+    function deleteEntry(paymentID, paymentName) {
       Swal.fire({
         title: 'Delete Ledger Entry?',
-        html: `Are you sure you want to delete <strong>${ledgerName}</strong>?`,
+        html: `Are you sure you want to delete <strong>${paymentName}</strong>?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
@@ -483,13 +544,12 @@ $currentPage = 'finance';
         cancelButtonText: 'Cancel'
       }).then((result) => {
         if (result.isConfirmed) {
-
+          // You can add AJAX here to delete from DB
           Swal.fire(
             'Deleted!',
             'The ledger entry has been deleted.',
             'success'
           );
-
         }
       });
     }
@@ -498,17 +558,43 @@ $currentPage = 'finance';
       $('#exportModal').modal('show');
     }
 
+    function toggleDateInputs() {
+      const selected = document.getElementById("periodSelect").value;
+      document.getElementById("dailyInput").style.display = "none";
+      document.getElementById("monthInput").style.display = "none";
+      document.getElementById("yearInput").style.display = "none";
+
+      if (selected === "daily") {
+        document.getElementById("dailyInput").style.display = "block";
+      } else if (selected === "monthly") {
+        document.getElementById("monthInput").style.display = "block";
+      } else if (selected === "yearly") {
+        document.getElementById("yearInput").style.display = "block";
+      }
+    }
+    document.addEventListener("DOMContentLoaded", toggleDateInputs);
+
+
     function filterExportTable() {
       const selected = document.getElementById("periodSelect").value;
       const container = document.getElementById("filteredTableContainer");
       let filtered = [];
 
       if (selected === "daily") {
-        filtered = $('#ledgerTable').DataTable().data().toArray().filter(l => l.date === "2025-01-05");
+        const inputDate = document.getElementById("dailyInput").value;
+        //print_r(inputDate);
+        if (!inputDate) return container.innerHTML = "<p class='text-danger'>Please select a date.</p>";
+        filtered = ledgerData.filter(l => l.date.substring(0, 10) === inputDate);
       } else if (selected === "monthly") {
-        filtered = $('#ledgerTable').DataTable().data().toArray().filter(l => l.date.startsWith("2025-01"));
+        const inputMonth = document.getElementById("monthInput").value;
+        if (!inputMonth) return container.innerHTML = "<p class='text-danger'>Please select a month.</p>";
+        filtered = ledgerData.filter(l => l.date.startsWith(inputMonth));
+
       } else if (selected === "yearly") {
-        filtered = $('#ledgerTable').DataTable().data().toArray().filter(l => l.date.startsWith("2025"));
+        const inputYear = document.getElementById("yearInput").value;
+        //dd(inputYear)
+        if (!inputYear) return container.innerHTML = "<p class='text-danger'>Please enter a year.</p>";
+        filtered = ledgerData.filter(l => l.date.startsWith(inputYear));
       }
 
       if (filtered.length === 0) {
@@ -517,21 +603,20 @@ $currentPage = 'finance';
       }
 
       let table = `<div class="table-responsive"><table class="table table-bordered">
-  <thead><tr>
-    <th>No.</th><th>Payment ID</th><th>Date</th><th>Type</th><th>Payment Method</th><th>Amount (RM)</th>
-  </tr></thead><tbody>`;
+    <thead><tr>
+      <th>No.</th><th>Payment ID</th><th>Date</th><th>Type</th><th>Payment Method</th><th>Amount (RM)</th>
+    </tr></thead><tbody>`;
 
       filtered.forEach((item, i) => {
         table += `<tr>
-    <td>${i + 1}</td>
-    <td>${item.paymentID}</td>
-    <td>${item.date}</td>
-    <td>${item.type}</td>
-    <td>${item.paymentMethod}</td>
-    <td>${item.amount.toFixed(2)}</td>
-  </tr>`;
+      <td>${i + 1}</td>
+      <td>${item.paymentID}</td>
+      <td>${item.date}</td>
+      <td>${item.type}</td>
+      <td>${item.paymentMethod}</td>
+      <td>${item.amount.toFixed(2)}</td>
+    </tr>`;
       });
-
 
       table += "</tbody></table></div>";
       container.innerHTML = table;
