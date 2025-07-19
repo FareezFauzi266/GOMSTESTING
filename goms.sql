@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jul 19, 2025 at 01:36 AM
+-- Generation Time: Jul 19, 2025 at 02:02 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -53,10 +53,10 @@ CREATE TABLE `inventoryitem` (
 --
 
 INSERT INTO `inventoryitem` (`itemCode`, `itemName`, `itemQuantity`, `itemPrice`, `itemCategory`, `itemSupplierID`) VALUES
-(7001, 'Gym Membership - Basic', 38, 150.00, 'membership', 6),
+(7001, 'Gym Membership - Basic', 36, 150.00, 'membership', 6),
 (7002, 'Gym T-Shirt', 200, 15.00, 'merchandise', 4),
 (7003, 'Protein Powder', 75, 80.00, 'supplements', 5),
-(7004, 'Energy Bar Pack', 146, 10.00, 'supplements', 5),
+(7004, 'Energy Bar Pack', 143, 10.00, 'supplements', 5),
 (7005, 'Water Bottle', 167, 12.00, 'merchandise', 4),
 (7006, 'Resistance Bands', 90, 20.00, 'equipment', 2);
 
@@ -97,7 +97,9 @@ CREATE TABLE `logpayment` (
 INSERT INTO `logpayment` (`paymentID`, `userID`, `createdAt`, `paymentAmount`, `paymentMethod`, `transactionType`, `discount`) VALUES
 (9001, 1, '2025-07-18 15:14:18', 126.72, 'E-Wallet', 'merchandise', 12),
 (9002, 2, '2025-07-19 01:41:54', 46.80, 'Bank Transfer', 'merchandise, supplements', 10),
-(9003, 2, '2025-07-19 01:42:44', 1800.00, 'Cash', 'membership', 0);
+(9003, 2, '2025-07-19 01:42:44', 1800.00, 'Cash', 'membership', 0),
+(9004, 2, '2025-07-19 19:16:55', 240.00, 'E-Wallet', 'membership', 20),
+(9005, 2, '2025-07-19 19:42:10', 30.00, 'Credit/Debit Card', 'supplements', 0);
 
 -- --------------------------------------------------------
 
@@ -118,7 +120,9 @@ CREATE TABLE `maintenanceitem` (
 
 INSERT INTO `maintenanceitem` (`maintainedItemID`, `scheduleID`, `itemCode`, `daysOfWeek`) VALUES
 ('MID001', 'MTB001', 7006, 'M-W-F-U'),
-('MID002', 'MTB001', 7001, 'MT-HF--');
+('MID002', 'MTB001', 7001, 'MT-HF--'),
+('MID003', 'MTB002', 7005, 'M-W-F-U'),
+('MID004', 'MTB002', 7004, 'MTWHFSU');
 
 -- --------------------------------------------------------
 
@@ -146,7 +150,8 @@ INSERT INTO `maintenancerecord` (`recordID`, `maintainedItemID`, `userID`, `main
 ('R003', 'MID001', 2, '2025-07-18', 'OK', 'hhhh', NULL),
 ('R004', 'MID002', 2, '2025-07-14', 'OK', 'hehe123', NULL),
 ('R005', 'MID002', 2, '2025-07-15', 'OK', 'heehe123321', '/uploads/maintenance/ATT_687ac266d3ee5_Screenshot 2025-07-19 at 3.53.55 AM.png'),
-('R006', 'MID002', 2, '2025-07-17', 'OK', 'huhu', '/uploads/maintenance/ATT_R006.png');
+('R006', 'MID002', 2, '2025-07-17', 'OK', 'huhu', '/uploads/maintenance/ATT_R006.png'),
+('R007', 'MID003', 2, '2025-07-14', 'Needs Repair', 'hehe', '/uploads/maintenance/ATT_R007.png');
 
 -- --------------------------------------------------------
 
@@ -167,7 +172,8 @@ CREATE TABLE `maintenanceschedule` (
 --
 
 INSERT INTO `maintenanceschedule` (`scheduleID`, `scheduleName`, `createdBy`, `createdAt`, `scheduleDesc`) VALUES
-('MTB001', 'Electrical Items', 2, '2025-07-19', 'Maintenance for Electrical Items');
+('MTB001', 'Electrical Items', 2, '2025-07-19', 'Maintenance for Electrical Items'),
+('MTB002', 'Free weight machines', 2, '2025-07-19', 'Maintenance schedule for free weights item. eg: dumbelss and plates');
 
 -- --------------------------------------------------------
 
@@ -313,7 +319,7 @@ ALTER TABLE `invoice`
 -- AUTO_INCREMENT for table `logpayment`
 --
 ALTER TABLE `logpayment`
-  MODIFY `paymentID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9004;
+  MODIFY `paymentID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9006;
 
 --
 -- AUTO_INCREMENT for table `supplier`

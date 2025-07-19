@@ -266,7 +266,7 @@ try {
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="window.print()">
+          <button type="button" class="btn btn-primary" onclick="generateExportLetter()">
             <i class="fas fa-file-pdf mr-1"></i> Print to PDF
           </button>
         </div>
@@ -620,6 +620,69 @@ try {
 
       table += "</tbody></table></div>";
       container.innerHTML = table;
+    }
+
+    // Custom export letter function
+    function generateExportLetter() {
+      // Get selected period label
+      const selected = document.getElementById("periodSelect").value;
+      let periodLabel = "";
+      if (selected === "daily") {
+        periodLabel = "Financial Report for " + document.getElementById("dailyInput").value;
+      } else if (selected === "monthly") {
+        periodLabel = "Financial Report for " + document.getElementById("monthInput").value;
+      } else if (selected === "yearly") {
+        periodLabel = "Financial Report for " + document.getElementById("yearInput").value;
+      } else {
+        periodLabel = "Financial Report";
+      }
+
+      // Get the filtered table HTML
+      const tableHTML = document.getElementById("filteredTableContainer").innerHTML;
+
+      // Build the letter HTML
+      const letterHTML = `
+        <html>
+        <head>
+          <title>${periodLabel}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; font-size: 13px; }
+            .header { display: flex; align-items: center; border-bottom: 2px solid #222; padding-bottom: 16px; margin-bottom: 24px; }
+            .logo { width: 80px; height: 80px; margin-right: 24px; }
+            .company-info { font-size: 1.1em; }
+            .company-info strong { font-size: 1.3em; }
+            .contact { margin-top: 8px; }
+            .topic { font-size: 1.2em; font-weight: bold; margin: 24px 0 16px 0; }
+            table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+            th, td { border: 1px solid #888; padding: 8px; text-align: left; }
+            th { background: #f0f0f0; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <img src="../images/spartan-logo.png" class="logo" alt="Spartan Gym and Fitness Logo">
+            <div class="company-info">
+              <strong>Spartan Gym and Fitness Sdn. Bhd.</strong><br>
+              C-2-07, Tingkat 2, Blok C Park Avenue, Jalan Pju 1, Damansara Damai,<br>
+              47830, Petaling Jaya, Selangor.<br>
+              <div class="contact">
+                Tel: +603-61439387<br>
+                Email: spartangymandfitness@gmail.com
+              </div>
+            </div>
+          </div>
+          <div class="topic">${periodLabel}</div>
+          ${tableHTML}
+        </body>
+        </html>
+      `;
+
+      // Open in new window and print
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(letterHTML);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
     }
   </script>
 </body>
