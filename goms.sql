@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1:3307
--- Generation Time: Jul 18, 2025 at 09:24 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost
+-- Generation Time: Jul 19, 2025 at 01:36 AM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `goms`
 --
-CREATE DATABASE IF NOT EXISTS `goms` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `goms`;
 
 -- --------------------------------------------------------
 
@@ -29,13 +27,10 @@ USE `goms`;
 -- Table structure for table `financialledger`
 --
 
-DROP TABLE IF EXISTS `financialledger`;
-CREATE TABLE IF NOT EXISTS `financialledger` (
-  `ledgerID` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `financialledger` (
+  `ledgerID` int(11) NOT NULL,
   `paymentID` int(11) DEFAULT NULL,
-  `ledgerName` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`ledgerID`),
-  KEY `paymentID` (`paymentID`)
+  `ledgerName` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -44,28 +39,25 @@ CREATE TABLE IF NOT EXISTS `financialledger` (
 -- Table structure for table `inventoryitem`
 --
 
-DROP TABLE IF EXISTS `inventoryitem`;
-CREATE TABLE IF NOT EXISTS `inventoryitem` (
-  `itemCode` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `inventoryitem` (
+  `itemCode` int(11) NOT NULL,
   `itemName` varchar(100) DEFAULT NULL,
   `itemQuantity` int(11) DEFAULT NULL,
   `itemPrice` decimal(10,2) DEFAULT NULL,
   `itemCategory` varchar(50) DEFAULT NULL,
-  `itemSupplierID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`itemCode`),
-  KEY `itemSupplierID` (`itemSupplierID`)
-) ENGINE=InnoDB AUTO_INCREMENT=7007 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `itemSupplierID` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `inventoryitem`
 --
 
 INSERT INTO `inventoryitem` (`itemCode`, `itemName`, `itemQuantity`, `itemPrice`, `itemCategory`, `itemSupplierID`) VALUES
-(7001, 'Gym Membership - Basic', 50, 150.00, 'membership', 6),
+(7001, 'Gym Membership - Basic', 38, 150.00, 'membership', 6),
 (7002, 'Gym T-Shirt', 200, 15.00, 'merchandise', 4),
 (7003, 'Protein Powder', 75, 80.00, 'supplements', 5),
-(7004, 'Energy Bar Pack', 150, 10.00, 'supplements', 5),
-(7005, 'Water Bottle', 168, 12.00, 'merchandise', 4),
+(7004, 'Energy Bar Pack', 146, 10.00, 'supplements', 5),
+(7005, 'Water Bottle', 167, 12.00, 'merchandise', 4),
 (7006, 'Resistance Bands', 90, 20.00, 'equipment', 2);
 
 -- --------------------------------------------------------
@@ -74,16 +66,12 @@ INSERT INTO `inventoryitem` (`itemCode`, `itemName`, `itemQuantity`, `itemPrice`
 -- Table structure for table `invoice`
 --
 
-DROP TABLE IF EXISTS `invoice`;
-CREATE TABLE IF NOT EXISTS `invoice` (
-  `invoiceCode` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `invoice` (
+  `invoiceCode` int(11) NOT NULL,
   `invoiceDate` datetime DEFAULT current_timestamp(),
   `totalAmount` decimal(10,2) DEFAULT NULL,
   `itemCode` int(11) DEFAULT NULL,
-  `supplierID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`invoiceCode`),
-  KEY `itemCode` (`itemCode`),
-  KEY `supplierID` (`supplierID`)
+  `supplierID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -92,25 +80,24 @@ CREATE TABLE IF NOT EXISTS `invoice` (
 -- Table structure for table `logpayment`
 --
 
-DROP TABLE IF EXISTS `logpayment`;
-CREATE TABLE IF NOT EXISTS `logpayment` (
-  `paymentID` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `logpayment` (
+  `paymentID` int(11) NOT NULL,
   `userID` int(11) DEFAULT NULL,
   `createdAt` datetime DEFAULT current_timestamp(),
   `paymentAmount` decimal(10,2) DEFAULT NULL,
   `paymentMethod` enum('Cash','Credit/Debit Card','Bank Transfer','E-Wallet') NOT NULL,
   `transactionType` varchar(50) DEFAULT NULL,
-  `discount` int(11) DEFAULT 0,
-  PRIMARY KEY (`paymentID`),
-  KEY `userID` (`userID`)
-) ENGINE=InnoDB AUTO_INCREMENT=9002 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `discount` int(11) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `logpayment`
 --
 
 INSERT INTO `logpayment` (`paymentID`, `userID`, `createdAt`, `paymentAmount`, `paymentMethod`, `transactionType`, `discount`) VALUES
-(9001, 1, '2025-07-18 15:14:18', 126.72, 'E-Wallet', 'merchandise', 12);
+(9001, 1, '2025-07-18 15:14:18', 126.72, 'E-Wallet', 'merchandise', 12),
+(9002, 2, '2025-07-19 01:41:54', 46.80, 'Bank Transfer', 'merchandise, supplements', 10),
+(9003, 2, '2025-07-19 01:42:44', 1800.00, 'Cash', 'membership', 0);
 
 -- --------------------------------------------------------
 
@@ -118,16 +105,20 @@ INSERT INTO `logpayment` (`paymentID`, `userID`, `createdAt`, `paymentAmount`, `
 -- Table structure for table `maintenanceitem`
 --
 
-DROP TABLE IF EXISTS `maintenanceitem`;
-CREATE TABLE IF NOT EXISTS `maintenanceitem` (
-  `maintainedItemID` int(11) NOT NULL AUTO_INCREMENT,
-  `scheduleID` int(11) DEFAULT NULL,
-  `itemCode` int(11) DEFAULT NULL,
-  `frequencyDays` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`maintainedItemID`),
-  KEY `scheduleID` (`scheduleID`),
-  KEY `itemCode` (`itemCode`)
+CREATE TABLE `maintenanceitem` (
+  `maintainedItemID` varchar(10) NOT NULL,
+  `scheduleID` varchar(10) NOT NULL,
+  `itemCode` int(11) NOT NULL,
+  `daysOfWeek` varchar(7) NOT NULL DEFAULT '-------'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `maintenanceitem`
+--
+
+INSERT INTO `maintenanceitem` (`maintainedItemID`, `scheduleID`, `itemCode`, `daysOfWeek`) VALUES
+('MID001', 'MTB001', 7006, 'M-W-F-U'),
+('MID002', 'MTB001', 7001, 'MT-HF--');
 
 -- --------------------------------------------------------
 
@@ -135,19 +126,27 @@ CREATE TABLE IF NOT EXISTS `maintenanceitem` (
 -- Table structure for table `maintenancerecord`
 --
 
-DROP TABLE IF EXISTS `maintenancerecord`;
-CREATE TABLE IF NOT EXISTS `maintenancerecord` (
-  `recordID` int(11) NOT NULL AUTO_INCREMENT,
-  `maintainedItemID` int(11) DEFAULT NULL,
-  `userID` int(11) DEFAULT NULL,
-  `maintenanceDate` date DEFAULT NULL,
-  `itemCondition` enum('Good','Need Maintenance') DEFAULT NULL,
+CREATE TABLE `maintenancerecord` (
+  `recordID` varchar(10) NOT NULL,
+  `maintainedItemID` varchar(10) NOT NULL,
+  `userID` int(11) NOT NULL,
+  `maintenanceDate` date NOT NULL,
+  `itemCondition` enum('OK','Needs Repair','Replace Soon') NOT NULL,
   `remarks` text DEFAULT NULL,
-  `attachmentPath` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`recordID`),
-  KEY `maintainedItemID` (`maintainedItemID`),
-  KEY `userID` (`userID`)
+  `attachmentPath` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `maintenancerecord`
+--
+
+INSERT INTO `maintenancerecord` (`recordID`, `maintainedItemID`, `userID`, `maintenanceDate`, `itemCondition`, `remarks`, `attachmentPath`) VALUES
+('R001', 'MID001', 2, '2025-07-14', 'Needs Repair', 'hehe', NULL),
+('R002', 'MID001', 2, '2025-07-16', 'OK', 'hehe', NULL),
+('R003', 'MID001', 2, '2025-07-18', 'OK', 'hhhh', NULL),
+('R004', 'MID002', 2, '2025-07-14', 'OK', 'hehe123', NULL),
+('R005', 'MID002', 2, '2025-07-15', 'OK', 'heehe123321', '/uploads/maintenance/ATT_687ac266d3ee5_Screenshot 2025-07-19 at 3.53.55 AM.png'),
+('R006', 'MID002', 2, '2025-07-17', 'OK', 'huhu', '/uploads/maintenance/ATT_R006.png');
 
 -- --------------------------------------------------------
 
@@ -155,16 +154,20 @@ CREATE TABLE IF NOT EXISTS `maintenancerecord` (
 -- Table structure for table `maintenanceschedule`
 --
 
-DROP TABLE IF EXISTS `maintenanceschedule`;
-CREATE TABLE IF NOT EXISTS `maintenanceschedule` (
-  `scheduleID` int(11) NOT NULL AUTO_INCREMENT,
-  `scheduleName` varchar(100) DEFAULT NULL,
-  `scheduleDescription` text DEFAULT NULL,
-  `createdBy` int(11) DEFAULT NULL,
-  `createdAt` datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (`scheduleID`),
-  KEY `createdBy` (`createdBy`)
+CREATE TABLE `maintenanceschedule` (
+  `scheduleID` varchar(10) NOT NULL,
+  `scheduleName` varchar(255) NOT NULL,
+  `createdBy` int(11) NOT NULL,
+  `createdAt` date DEFAULT curdate(),
+  `scheduleDesc` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `maintenanceschedule`
+--
+
+INSERT INTO `maintenanceschedule` (`scheduleID`, `scheduleName`, `createdBy`, `createdAt`, `scheduleDesc`) VALUES
+('MTB001', 'Electrical Items', 2, '2025-07-19', 'Maintenance for Electrical Items');
 
 -- --------------------------------------------------------
 
@@ -172,17 +175,15 @@ CREATE TABLE IF NOT EXISTS `maintenanceschedule` (
 -- Table structure for table `supplier`
 --
 
-DROP TABLE IF EXISTS `supplier`;
-CREATE TABLE IF NOT EXISTS `supplier` (
-  `supplierID` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `supplier` (
+  `supplierID` int(11) NOT NULL,
   `supplierName` varchar(100) DEFAULT NULL,
   `supplierContactNumber` varchar(20) DEFAULT NULL,
   `supplierEmail` varchar(100) DEFAULT NULL,
   `supplierAddress` text DEFAULT NULL,
   `supplierPICName` varchar(100) DEFAULT NULL,
-  `supplierPICNumber` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`supplierID`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `supplierPICNumber` varchar(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `supplier`
@@ -202,22 +203,129 @@ INSERT INTO `supplier` (`supplierID`, `supplierName`, `supplierContactNumber`, `
 -- Table structure for table `users`
 --
 
-DROP TABLE IF EXISTS `users`;
-CREATE TABLE IF NOT EXISTS `users` (
-  `userID` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `users` (
+  `userID` int(11) NOT NULL,
   `userName` varchar(100) NOT NULL,
   `userRole` enum('Manager','Staff') NOT NULL,
   `userEmail` varchar(100) DEFAULT NULL,
-  `userPassword` varchar(255) NOT NULL,
-  PRIMARY KEY (`userID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `userPassword` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`userID`, `userName`, `userRole`, `userEmail`, `userPassword`) VALUES
-(1, 'gomsManager', 'Manager', 'anyemail@gmail.com', 'goms123');
+(1, 'gomsManager', 'Manager', 'anyemail@gmail.com', 'goms123'),
+(2, 'fareezM', 'Manager', 'fareez@gmail.com', 'fareez');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `financialledger`
+--
+ALTER TABLE `financialledger`
+  ADD PRIMARY KEY (`ledgerID`),
+  ADD KEY `paymentID` (`paymentID`);
+
+--
+-- Indexes for table `inventoryitem`
+--
+ALTER TABLE `inventoryitem`
+  ADD PRIMARY KEY (`itemCode`),
+  ADD KEY `itemSupplierID` (`itemSupplierID`);
+
+--
+-- Indexes for table `invoice`
+--
+ALTER TABLE `invoice`
+  ADD PRIMARY KEY (`invoiceCode`),
+  ADD KEY `itemCode` (`itemCode`),
+  ADD KEY `supplierID` (`supplierID`);
+
+--
+-- Indexes for table `logpayment`
+--
+ALTER TABLE `logpayment`
+  ADD PRIMARY KEY (`paymentID`),
+  ADD KEY `userID` (`userID`);
+
+--
+-- Indexes for table `maintenanceitem`
+--
+ALTER TABLE `maintenanceitem`
+  ADD PRIMARY KEY (`maintainedItemID`),
+  ADD KEY `scheduleID` (`scheduleID`),
+  ADD KEY `itemCode` (`itemCode`);
+
+--
+-- Indexes for table `maintenancerecord`
+--
+ALTER TABLE `maintenancerecord`
+  ADD PRIMARY KEY (`recordID`),
+  ADD KEY `maintainedItemID` (`maintainedItemID`),
+  ADD KEY `userID` (`userID`);
+
+--
+-- Indexes for table `maintenanceschedule`
+--
+ALTER TABLE `maintenanceschedule`
+  ADD PRIMARY KEY (`scheduleID`),
+  ADD KEY `createdBy` (`createdBy`);
+
+--
+-- Indexes for table `supplier`
+--
+ALTER TABLE `supplier`
+  ADD PRIMARY KEY (`supplierID`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`userID`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `financialledger`
+--
+ALTER TABLE `financialledger`
+  MODIFY `ledgerID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `inventoryitem`
+--
+ALTER TABLE `inventoryitem`
+  MODIFY `itemCode` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7007;
+
+--
+-- AUTO_INCREMENT for table `invoice`
+--
+ALTER TABLE `invoice`
+  MODIFY `invoiceCode` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `logpayment`
+--
+ALTER TABLE `logpayment`
+  MODIFY `paymentID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9004;
+
+--
+-- AUTO_INCREMENT for table `supplier`
+--
+ALTER TABLE `supplier`
+  MODIFY `supplierID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables

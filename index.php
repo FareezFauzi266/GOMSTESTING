@@ -2,6 +2,7 @@
 session_start();
 include("db.php"); // Your DB connection file
 
+
 // If already logged in, redirect
 if (isset($_SESSION['userID'])) {
     if ($_SESSION['userRole'] == 'Manager') {
