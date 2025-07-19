@@ -1,6 +1,7 @@
 <?php
 session_start();
 include("../header&footer/settings.php");
+include("../connection/connection.php");
 //include(function/function.php);
 $currentPage = 'inventory';
 
