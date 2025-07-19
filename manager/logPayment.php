@@ -1,13 +1,17 @@
 <?php
 session_start();
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+if (!isset($_SESSION['userID'])) {
+    header("Location: /GOMS/index.php");
+    exit;
+}
+$userID = $_SESSION['userID'];
+
 include("../connection/connection.php"); // <-- Updated PDO connection
 include("../header&footer/settings.php");
 $currentPage = 'finance';
-
-if (!isset($_SESSION['userID'])) {
-    die("Please login first.");
-}
-$userID = $_SESSION['userID'];
 
 // Handle POST AJAX request for payment processing
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {

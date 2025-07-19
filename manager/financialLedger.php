@@ -1,5 +1,12 @@
 <?php
 session_start();
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+if (!isset($_SESSION['userID'])) {
+    header("Location: /GOMS/index.php");
+    exit;
+}
 include("../header&footer/settings.php");
 include("../connection/connection.php"); // uses $dbh from PDO
 $currentPage = 'finance';
