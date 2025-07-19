@@ -1,3 +1,27 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+if (isset($_GET['logout'])) {
+    // Clear session
+    $_SESSION = [];
+    session_destroy();
+
+    // Optional: clear session cookie
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
+
+    // Redirect to index.php (login)
+    header("Location: /gomstesting/GOMSTESTING/index.php");
+    exit;
+}
+?>
+
 <!-- Navbar -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <!-- Left navbar links -->
@@ -80,7 +104,7 @@ document.getElementById('logoutBtn').addEventListener('click', function(e) {
     }).then((result) => {
         if (result.isConfirmed) {
             // Redirect to root index.php after confirmation
-            window.location.href = '../index.php';
+            window.location.href = '?logout=true';
         }
     });
 });

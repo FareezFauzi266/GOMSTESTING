@@ -1,7 +1,6 @@
 <?php
 session_start();
-include("db.php"); // Your DB connection file
-
+include("connection/connection.php"); // this contains $dbh
 
 // If already logged in, redirect
 if (isset($_SESSION['userID'])) {
@@ -22,43 +21,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userRole = strtolower($_POST['userRole'] ?? '');
 
     if ($userID && $password && ($userRole == 'manager' || $userRole == 'staff')) {
-        // Prepare query
-        $stmt = $conn->prepare("SELECT userID, userName, userRole, userPassword FROM users WHERE userID = ? AND LOWER(userRole) = ?");
-        $stmt->bind_param("is", $userID, $userRole);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        try {
+            $stmt = $dbh->prepare("SELECT userID, userName, userRole, userPassword FROM users WHERE userID = ? AND LOWER(userRole) = ?");
+            $stmt->execute([$userID, $userRole]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($result && $result->num_rows === 1) {
-            $user = $result->fetch_assoc();
+            if ($user) {
+                // Check password (plain text, change to password_verify if hashed)
+                if ($password === $user['userPassword']) {
+                    $_SESSION['userID'] = $user['userID'];
+                    $_SESSION['userName'] = $user['userName'];
+                    $_SESSION['userRole'] = ucfirst($user['userRole']);
 
-            // Verify password
-            if ($password === $user['userPassword']) {
-                // Login success: save session
-                $_SESSION['userID'] = $user['userID'];
-                $_SESSION['userName'] = $user['userName'];
-                $_SESSION['userRole'] = ucfirst($user['userRole']); // e.g., Manager or Staff
-
-                // Redirect based on role
-                if ($_SESSION['userRole'] == 'Manager') {
-                    header("Location: manager/dashboard.php");
-                    exit;
+                    if ($_SESSION['userRole'] == 'Manager') {
+                        header("Location: manager/dashboard.php");
+                        exit;
+                    } else {
+                        header("Location: staff/dashboard.php");
+                        exit;
+                    }
                 } else {
-                    header("Location: staff/dashboard.php");
-                    exit;
+                    $login_error = 'Invalid password.';
                 }
             } else {
-                $login_error = 'Invalid password.';
+                $login_error = 'User not found or role mismatch.';
             }
-        } else {
-            $login_error = 'User not found or role mismatch.';
+        } catch (PDOException $e) {
+            $login_error = 'Database error: ' . $e->getMessage();
         }
-
-        $stmt->close();
     } else {
         $login_error = 'Please fill all fields correctly.';
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en"> 
