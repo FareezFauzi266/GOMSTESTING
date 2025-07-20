@@ -9,6 +9,7 @@ if (!isset($_SESSION['userID'])) {
 }
 include("../header&footer/settings.php");
 include("../db.php");
+//include("../connection/connection.php");
 // echo "<script>console.log('UserID: " . $_SESSION['userID'] . "');</script>";
 //include(function/function.php);
 $currentPage = 'dashboard';
