@@ -17,7 +17,7 @@ if (isset($_GET['logout'])) {
     }
 
     // Redirect to index.php (login)
-    header("Location: /GOMS/index.php");
+    header("Location: /gomstesting/GOMSTESTING/index.php");
     exit;
 }
 ?>
