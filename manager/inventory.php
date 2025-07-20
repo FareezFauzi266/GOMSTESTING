@@ -501,32 +501,44 @@ $(document).ready(function() {
     }
 
     // Function to add new supplier
+    // Modify the addNewSupplier function to match your PHP handler
     function addNewSupplier(supplierData) {
         return new Promise((resolve, reject) => {
             $.ajax({
                 url: window.location.href,
                 type: 'POST',
+                dataType: 'json',
                 data: {
                     ajax: true,
                     action: 'add_supplier',
-                    supplier_name: supplierData.name,
-                    phone: supplierData.phone,
-                    email: supplierData.email,
-                    pic_name: supplierData.picName,
-                    pic_phone: supplierData.picPhone
+                    supplierName: supplierData.name,
+                    supplierContactNumber: supplierData.phone,
+                    supplierEmail: supplierData.email,
+                    supplierPICName: supplierData.picName,
+                    supplierPICNumber: supplierData.picPhone
                 },
                 success: function(response) {
                     if (response.success) {
+                        // Update both dropdowns
+                        const newOption = new Option(
+                            response.supplierName, 
+                            response.supplierID,
+                            true,  // selected
+                            true   // selected
+                        );
+                        
+                        $('#existingSupplier, #editSupplier').append(newOption).trigger('change');
+                        
                         resolve({
-                            id: response.supplier_id,
-                            name: response.supplier_name
+                            id: response.supplierID,
+                            name: response.supplierName
                         });
                     } else {
                         reject(response.message || 'Failed to add supplier');
                     }
                 },
-                error: function() {
-                    reject('Error communicating with server');
+                error: function(xhr, status, error) {
+                    reject('Server error: ' + xhr.responseText);
                 }
             });
         });
@@ -778,40 +790,40 @@ $(document).ready(function() {
               let supplierId = $('#existingSupplier').val();
               
               // Check if we're using an existing supplier or adding a new one
-              if (!supplierId) {
-                  // New supplier - validate required fields
-                  if (!$('#supplierName').val()) {
-                      Swal.fire({
-                          icon: 'error',
-                          title: 'Supplier Required',
-                          text: 'Please select an existing supplier or enter new supplier information',
-                          timer: 2000
-                      });
-                      return;
-                  }
-                  
-                  // Create new supplier
-                  try {
-                      const supplierData = {
-                          name: $('#supplierName').val(),
-                          phone: $('#supplierPhone').val(),
-                          email: $('#supplierEmail').val(),
-                          picName: $('#supplierPICName').val(),
-                          picPhone: $('#supplierPICPhone').val()
-                      };
-                      
-                      const newSupplier = await addNewSupplier(supplierData);
-                      supplierId = newSupplier.id;
-                  } catch (error) {
-                      Swal.fire({
-                          icon: 'error',
-                          title: 'Error',
-                          text: error,
-                          timer: 2000
-                      });
-                      return;
-                  }
-              }
+              if (!supplierId && $('#newSupplierInfo').is(':visible')) {
+                try {
+                    const supplierData = {
+                        name: $('#supplierName').val(),
+                        phone: $('#supplierPhone').val(),
+                        email: $('#supplierEmail').val(),
+                        picName: $('#supplierPICName').val(),
+                        picPhone: $('#supplierPICPhone').val()
+                    };
+                    
+                    if (!supplierData.name) {
+                        throw new Error('Supplier name is required');
+                    }
+                    
+                    const newSupplier = await addNewSupplier(supplierData);
+                    supplierId = newSupplier.id;
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Supplier Error',
+                        text: error.toString(),
+                        timer: 3000
+                    });
+                    return;
+                }
+            } else if (!supplierId) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Supplier Required',
+                    text: 'Please select a supplier or add a new one',
+                    timer: 2000
+                });
+                return;
+            }
 
               // Create the new inventory item
               const itemData = {
