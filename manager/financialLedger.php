@@ -218,7 +218,6 @@ try {
               <table id="ledgerTable" class="table table-bordered table-hover">
                 <thead>
                   <tr>
-                    <th>No.</th>
                     <th>Payment ID</th>
                     <th>Date</th>
                     <th>Payment Amount</th>
@@ -402,10 +401,7 @@ try {
     $(document).ready(function() {
       const table = $('#ledgerTable').DataTable({
         data: ledgerData,
-        columns: [{
-            data: null,
-            render: (data, type, row, meta) => meta.row + 1
-          },
+        columns: [
           {
             data: 'paymentID'
           },
