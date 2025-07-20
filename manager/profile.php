@@ -1,9 +1,33 @@
 <?php
 session_start();
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+
+if (!isset($_SESSION['userID'])) {
+    header("Location: /GOMS/index.php");
+    exit;
+}
+
+$userID = $_SESSION['userID'];
+
+include("../connection/db2.php");// Include DB first
 include("../header&footer/settings.php");
-//include(function/function.php);
+
 $currentPage = 'profile';
 
+// Now we can query the database
+$query = "SELECT userID, userName, userRole, userEmail FROM users WHERE userID = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $userID);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+
+if (!$user) {
+    echo "<p class='text-danger'>User not found.</p>";
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -165,19 +189,19 @@ $currentPage = 'profile';
                           <div class="card-body">
                             <div class="row py-2 border-bottom">
                               <div class="col-4 font-weight-bold">User ID</div>
-                              <div class="col-8" id="displayUserID">MGR001</div>
+                              <div class="col-8" id="displayUserID"><?= htmlspecialchars($user['userID']) ?></div>
                             </div>
                             <div class="row py-2 border-bottom">
                               <div class="col-4 font-weight-bold">Username</div>
-                              <div class="col-8" id="displayUserName">John Doe</div>
+                              <div class="col-8" id="displayUserName"><?= htmlspecialchars($user['userName']) ?></div>
                             </div>
                             <div class="row py-2 border-bottom">
                               <div class="col-4 font-weight-bold">Role</div>
-                              <div class="col-8" id="displayUserRole">Manager</div>
+                              <div class="col-8" id="displayUserRole"><?= htmlspecialchars($user['userRole']) ?></div>
                             </div>
                             <div class="row py-2 border-bottom">
                               <div class="col-4 font-weight-bold">Email</div>
-                              <div class="col-8" id="displayUserEmail">john.doe@example.com</div>
+                              <div class="col-8" id="displayUserEmail"><?= htmlspecialchars($user['userEmail']) ?></div>
                             </div>
                           </div>
                         </div>
@@ -236,19 +260,19 @@ $currentPage = 'profile';
                 <div class="modal-body">
                   <div class="form-group">
                     <label>User ID</label>
-                    <input type="text" class="form-control" id="inputUserID" value="MGR001" readonly />
+                    <input type="text" class="form-control" id="inputUserID" value="<?= htmlspecialchars($user['userID']) ?>" readonly />
                   </div>
                   <div class="form-group">
                     <label>Username</label>
-                    <input type="text" class="form-control" id="inputUserName" value="John Doe" required />
+                    <input type="text" class="form-control" id="inputUserName" value="<?= htmlspecialchars($user['userName']) ?>" required />
                   </div>
                   <div class="form-group">
                     <label>Role</label>
-                    <input type="text" class="form-control" id="inputUserRole" value="Manager" readonly />
+                    <input type="text" class="form-control" id="inputUserRole" value="<?= htmlspecialchars($user['userRole']) ?>" readonly />
                   </div>
                   <div class="form-group">
                     <label>Email</label>
-                    <input type="email" class="form-control" id="inputUserEmail" value="john.doe@example.com" required />
+                    <input type="email" class="form-control" id="inputUserEmail" value="<?= htmlspecialchars($user['userEmail']) ?>" required />
                   </div>
                 </div>
 
@@ -296,97 +320,139 @@ $currentPage = 'profile';
       document.getElementById("overviewBtn").classList.remove("active");
     });
 
-  // Open modal and populate fields
-  function openEditProfileModal() {
-    $('#inputUserID').val($('#displayUserID').text());
-    $('#inputUserName').val($('#displayUserName').text());
-    $('#inputUserRole').val($('#displayUserRole').text());
-    $('#inputUserEmail').val($('#displayUserEmail').text());
-    $('#inputUserPassword').val('password123'); // Placeholder, not real password
 
-    $('#editProfileModal').modal('show');
-  }
+    // Open modal and populate fields
+    function openEditProfileModal() {
+      $('#inputUserID').val($('#displayUserID').text());
+      $('#inputUserName').val($('#displayUserName').text());
+      $('#inputUserRole').val($('#displayUserRole').text());
+      $('#inputUserEmail').val($('#displayUserEmail').text());
+      $('#inputUserPassword').val('password123'); // Placeholder, not actual password
 
-  // Save changes
-  $('#saveProfileBtn').click(function () {
-    const form = $('#editProfileForm')[0];
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
+      $('#editProfileModal').modal('show');
     }
 
-    // Update displayed profile info
-    $('#displayUserName').text($('#inputUserName').val());
-    $('#displayUserEmail').text($('#inputUserEmail').val());
-    $('#displayUserPassword').text('********'); // Masked
+    // Save changes and submit via AJAX
+    $('#saveProfileBtn').click(function () {
+      const form = $('#editProfileForm')[0];
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
 
-    $('#editProfileModal').modal('hide');
+      const user_id = $('#inputUserID').val();
+      const username = $('#inputUserName').val();
+      const email = $('#inputUserEmail').val();
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Profile Updated',
-      text: 'Your changes have been saved.',
-      timer: 2000,
-      showConfirmButton: false
+      $.ajax({
+        url: 'update_profile.php',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          user_id: user_id,
+          username: username,
+          email: email
+        },
+        success: function (response) {
+          if (response.success) {
+            // Only update the displayed info if the server update was successful
+            $('#displayUserName').text(username);
+            $('#displayUserEmail').text(email);
+            $('#displayUserPassword').text('********'); // Just in case you have a password display
+
+            $('#editProfileModal').modal('hide');
+
+            Swal.fire({
+              icon: 'success',
+              title: 'Profile Updated',
+              text: 'Your changes have been saved.',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Update Failed',
+              text: response.message || 'Something went wrong. Please try again.',
+            });
+          }
+        },
+        error: function (xhr, status, error) {
+          console.error('AJAX Error:', xhr.responseText);
+          Swal.fire({
+            icon: 'error',
+            title: 'Request Error',
+            text: 'Failed to send update request.',
+          });
+        }
+      });
     });
-  });
 
   //change password
-  const currentStoredPassword = 'password123'; // Simulated; in production, this is validated server-side
+
+// Simulated; in production, this is validated server-side
 
   function openChangePasswordModal() {
     $('#changePasswordModal').modal('show');
     $('#changePasswordForm')[0].reset();
   }
 
- $('#changePasswordForm').submit(function (e) {
-  e.preventDefault(); // Prevent form from reloading the page
+$('#changePasswordForm').submit(function (e) {
+  e.preventDefault();
 
-  const current = $('#currentPassword').val();
-  const newPass = $('#newPassword').val();
-  const confirm = $('#confirmPassword').val();
-
-  if (current !== currentStoredPassword) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Incorrect Password',
-      text: 'The current password you entered is incorrect.'
-    });
-    return;
-  }
+  const current = $('#currentPassword').val().trim();
+  const newPass = $('#newPassword').val().trim();
+  const confirm = $('#confirmPassword').val().trim();
 
   if (newPass !== confirm) {
     Swal.fire({
       icon: 'error',
-      title: 'Password Mismatch',
-      text: 'New password and confirmation do not match.'
+      title: 'Mismatch',
+      text: 'New and confirm password do not match.'
     });
     return;
   }
 
-  if (newPass === currentStoredPassword) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Same As Current Password',
-      text: 'New password must be different from the current password.'
-    });
-    return;
-  }
-
-  Swal.fire({
-    icon: 'success',
-    title: 'Password Updated',
-    text: 'Your password has been successfully changed.',
-    timer: 2000,
-    showConfirmButton: false
+  $.ajax({
+    url: 'change_password.php',
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      current: current,
+      new: newPass
+    },
+    success: function (res) {
+      if (res.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: res.message,
+          timer: 2000,
+          showConfirmButton: false
+        });
+        $('#changePasswordForm')[0].reset();
+        $('#passwordBtn').removeClass('active');
+        $('#overviewBtn').addClass('active');
+        $('#profileOverviewSection').removeClass('d-none');
+        $('#changePasswordSection').addClass('d-none');
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: res.message
+        });
+      }
+    },
+    error: function () {
+      Swal.fire({
+        icon: 'error',
+        title: 'Request Failed',
+        text: 'Failed to communicate with server.'
+      });
+    }
   });
-
-  // Optionally clear the form
-  $('#changePasswordForm')[0].reset();
-
-  // Switch back to overview manually (optional)
-  $('#overviewBtn').click();
 });
+
 </script>
   </body>
 </html>
