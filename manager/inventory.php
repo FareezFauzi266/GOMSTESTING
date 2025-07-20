@@ -290,14 +290,14 @@ $suppliers = getSuppliers($conn);
                 </div>
                 <div class="form-group form-required">
                   <label for="addCategory">Category</label>
-<select class="form-control" id="addCategory" name="itemCategory" required>
-  <option value="">-- Select Category --</option>
-  <?php foreach ($categories as $category): ?>
-    <option value="<?= htmlspecialchars($category['itemCategory']) ?>">
-      <?= htmlspecialchars($category['itemCategory']) ?>
-    </option>
-  <?php endforeach; ?>
-</select>
+                  <select class="form-control" id="addCategory" name="itemCategory" required>
+                    <option value="">-- Select Category --</option>
+                    <?php foreach ($categories as $category): ?>
+                      <option value="<?= htmlspecialchars($category['itemCategory']) ?>">
+                        <?= htmlspecialchars($category['itemCategory']) ?>
+                      </option>
+                    <?php endforeach; ?>
+                  </select>
 
 
                 </div>
@@ -310,7 +310,9 @@ $suppliers = getSuppliers($conn);
                   <select class="form-control" id="existingSupplier">
                     <option value="">-- Select Supplier --</option>
                     <?php foreach ($suppliers as $supplier): ?>
-                    <option value="<?= $supplier['supplierID'] ?>"><?= htmlspecialchars($supplier['supplierName']) ?></option>
+                    <option value="<?= $supplier['supplierID'] ?>">
+                        <?= htmlspecialchars($supplier['supplierName'] ?? '') ?>
+                    </option>
                     <?php endforeach; ?>
                   </select>
                   <span class="new-supplier-toggle" onclick="toggleNewSupplier()">+ Add New Supplier</span>
@@ -386,11 +388,11 @@ $suppliers = getSuppliers($conn);
                 <div class="form-group form-required">
                   <label for="editCategory">Category</label>
                   <select class="form-control" id="editCategory" required>
-<?php foreach ($categories as $category): ?>
-  <option value="<?= htmlspecialchars($category['itemCategory']) ?>">
-    <?= htmlspecialchars($category['itemCategory']) ?>
-  </option>
-<?php endforeach; ?>
+                    <?php foreach ($categories as $category): ?>
+                      <option value="<?= htmlspecialchars($category['itemCategory']) ?>">
+                        <?= htmlspecialchars($category['itemCategory']) ?>
+                      </option>
+                    <?php endforeach; ?>
 
 
                   </select>
@@ -403,7 +405,9 @@ $suppliers = getSuppliers($conn);
                   <label for="editSupplier">Supplier Name</label>
                   <select class="form-control" id="editSupplier">
                     <?php foreach ($suppliers as $supplier): ?>
-                    <option value="<?= $supplier['supplierID'] ?>"><?= htmlspecialchars($supplier['supplierName']) ?></option>
+                    <option value="<?= $supplier['supplierID'] ?>">
+                        <?= htmlspecialchars($supplier['supplierName'] ?? '') ?>
+                    </option>
                     <?php endforeach; ?>
                   </select>
                 </div>
