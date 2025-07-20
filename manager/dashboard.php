@@ -4,11 +4,10 @@ header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
 if (!isset($_SESSION['userID'])) {
-    header("Location: /GOMS/index.php");
+    header("Location: /gomstesting/GOMSTESTING/index.php");
     exit;
 }
 include("../header&footer/settings.php");
-include("../db.php");
 //include("../connection/connection.php");
 // echo "<script>console.log('UserID: " . $_SESSION['userID'] . "');</script>";
 //include(function/function.php);
@@ -241,7 +240,7 @@ $currentPage = 'dashboard';
       <!-- /.control-sidebar -->
     </div>
     <!-- ./wrapper -->
-     <!-- JS dependencies -->
+    <!-- JS dependencies -->
     <script src="../app/plugins/jquery/jquery.min.js"></script>
     <script src="../app/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="../app/plugins/datatables/jquery.dataTables.min.js"></script>
@@ -458,21 +457,10 @@ $currentPage = 'dashboard';
         }
       }
 
-      
-
-
-
       // Call on page load
       
     </script>
 
-    <!-- jQuery -->
-    <script src="../app/plugins/jquery/jquery.min.js"></script>
-    <!-- Bootstrap 4 -->
-    <script src="../app/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- overlayScrollbars -->
-    <script src="../app/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="../app/dist/js/adminlte.min.js"></script>
+    
   </body>
 </html>

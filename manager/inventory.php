@@ -4,7 +4,7 @@ header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
 if (!isset($_SESSION['userID'])) {
-    header("Location: /GOMS/index.php");
+    header("Location: /gomstesting/GOMSTESTING/index.php");
     exit;
 }
 include("../header&footer/settings.php");
