@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jul 19, 2025 at 02:02 PM
+-- Generation Time: Jul 21, 2025 at 01:14 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -58,7 +58,8 @@ INSERT INTO `inventoryitem` (`itemCode`, `itemName`, `itemQuantity`, `itemPrice`
 (7003, 'Protein Powder', 75, 80.00, 'supplements', 5),
 (7004, 'Energy Bar Pack', 143, 10.00, 'supplements', 5),
 (7005, 'Water Bottle', 167, 12.00, 'merchandise', 4),
-(7006, 'Resistance Bands', 90, 20.00, 'equipment', 2);
+(7006, 'Resistance Bands', 90, 20.00, 'equipment', 2),
+(7007, 'Treadmill', 5, 2000.00, 'equipment', 7);
 
 -- --------------------------------------------------------
 
@@ -122,7 +123,8 @@ INSERT INTO `maintenanceitem` (`maintainedItemID`, `scheduleID`, `itemCode`, `da
 ('MID001', 'MTB001', 7006, 'M-W-F-U'),
 ('MID002', 'MTB001', 7001, 'MT-HF--'),
 ('MID003', 'MTB002', 7005, 'M-W-F-U'),
-('MID004', 'MTB002', 7004, 'MTWHFSU');
+('MID004', 'MTB002', 7004, 'MTWHFSU'),
+('MID005', 'MTB003', 7007, 'M--H--U');
 
 -- --------------------------------------------------------
 
@@ -151,7 +153,9 @@ INSERT INTO `maintenancerecord` (`recordID`, `maintainedItemID`, `userID`, `main
 ('R004', 'MID002', 2, '2025-07-14', 'OK', 'hehe123', NULL),
 ('R005', 'MID002', 2, '2025-07-15', 'OK', 'heehe123321', '/uploads/maintenance/ATT_687ac266d3ee5_Screenshot 2025-07-19 at 3.53.55 AM.png'),
 ('R006', 'MID002', 2, '2025-07-17', 'OK', 'huhu', '/uploads/maintenance/ATT_R006.png'),
-('R007', 'MID003', 2, '2025-07-14', 'Needs Repair', 'hehe', '/uploads/maintenance/ATT_R007.png');
+('R007', 'MID003', 2, '2025-07-14', 'Needs Repair', 'hehe', '/uploads/maintenance/ATT_R007.png'),
+('R008', 'MID004', 2, '2025-07-14', 'OK', 'eheh', NULL),
+('R009', 'MID005', 2, '2025-07-14', 'OK', 'hehe', NULL);
 
 -- --------------------------------------------------------
 
@@ -173,7 +177,8 @@ CREATE TABLE `maintenanceschedule` (
 
 INSERT INTO `maintenanceschedule` (`scheduleID`, `scheduleName`, `createdBy`, `createdAt`, `scheduleDesc`) VALUES
 ('MTB001', 'Electrical Items', 2, '2025-07-19', 'Maintenance for Electrical Items'),
-('MTB002', 'Free weight machines', 2, '2025-07-19', 'Maintenance schedule for free weights item. eg: dumbelss and plates');
+('MTB002', 'Free weight machines', 2, '2025-07-19', 'Maintenance schedule for free weights item. eg: dumbelss and plates'),
+('MTB003', 'Electrical Items', 3, '2025-07-20', 'sssss');
 
 -- --------------------------------------------------------
 
@@ -201,7 +206,8 @@ INSERT INTO `supplier` (`supplierID`, `supplierName`, `supplierContactNumber`, `
 (3, 'NutriPlus Distributors', '014-5678901', 'info@nutriplus.com.my', '789 Nutrition Blvd, Penang, Malaysia', 'Ahmad Faiz', '014-7654321'),
 (4, 'GymGear Supplies', '015-6789012', 'support@gymgear.my', '321 Power Rd, Johor Bahru, Malaysia', 'Siti Rahmah', '015-6543210'),
 (5, 'Elite Sports Equip', '016-7890123', 'contact@elitesports.com', '654 Champion Ln, Melaka, Malaysia', 'Michael Lee', '016-5432109'),
-(6, 'Spartan Gym and Fitness', '017-805 5323', 'contact@spartangym.com', 'Damansara Damai, 47810 Petaling Jaya, Selangor', 'Sufhian', '017-805 5323');
+(6, 'Spartan Gym and Fitness', '017-805 5323', 'contact@spartangym.com', 'Damansara Damai, 47810 Petaling Jaya, Selangor', 'Sufhian', '017-805 5323'),
+(7, 'Hammer Pro', '0198961029', 'sales@hammerpro.com', NULL, 'Abu', '0122341231');
 
 -- --------------------------------------------------------
 
@@ -223,7 +229,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`userID`, `userName`, `userRole`, `userEmail`, `userPassword`) VALUES
 (1, 'gomsManager', 'Manager', 'anyemail@gmail.com', 'goms123'),
-(2, 'fareezM', 'Manager', 'fareez@gmail.com', 'fareez');
+(2, 'fareezM', 'Manager', 'fareez@gmail.com', 'fareez'),
+(3, 'Sheikh', 'Staff', 'sheikh@gmail.com', 'sheikh');
 
 --
 -- Indexes for dumped tables
@@ -307,7 +314,7 @@ ALTER TABLE `financialledger`
 -- AUTO_INCREMENT for table `inventoryitem`
 --
 ALTER TABLE `inventoryitem`
-  MODIFY `itemCode` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7007;
+  MODIFY `itemCode` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7008;
 
 --
 -- AUTO_INCREMENT for table `invoice`
@@ -325,13 +332,13 @@ ALTER TABLE `logpayment`
 -- AUTO_INCREMENT for table `supplier`
 --
 ALTER TABLE `supplier`
-  MODIFY `supplierID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `supplierID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
