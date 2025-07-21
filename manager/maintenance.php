@@ -65,6 +65,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("ssissss", $rid, $_POST['maintainedItemID'], $_SESSION['userID'], $_POST['maintenanceDate'], $_POST['itemCondition'], $_POST['remarks'], $attachmentPath);
             $response['success'] = $stmt->execute();
             break;
+
+        case 'update_schedule':
+            $stmt = $conn->prepare("UPDATE maintenanceschedule SET scheduleName = ?, scheduleDesc = ? WHERE scheduleID = ?");
+            $stmt->bind_param("sss", $_POST['scheduleName'], $_POST['scheduleDesc'], $_POST['scheduleID']);
+            $response['success'] = $stmt->execute();
+            break;
+
+        case 'remove_item':
+            $stmt = $conn->prepare("DELETE FROM maintenanceitem WHERE maintainedItemID = ?");
+            $stmt->bind_param("s", $_POST['maintainedItemID']);
+            $response['success'] = $stmt->execute();
+            break;
     }
     echo json_encode($response);
     exit;
@@ -201,6 +213,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       background: #ffe082 !important;
       font-weight: bold;
     }
+    .table-bordered tbody tr:hover { background: #f3f6fa !important; }
+    .table-bordered td, .table-bordered th { vertical-align: middle; }
+    .modal-lg { max-width: 800px; }
+    .table-bordered th, .table-bordered td { text-align: center; }
+    .table-striped tbody tr:nth-of-type(odd) { background-color: #f9fafb; }
+    .table-hover tbody tr:hover { background: #f3f6fa !important; }
+    .table-bordered th, .table-bordered td { text-align: center; vertical-align: middle; font-size: 1rem; }
+    .modal-content { border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+    .modal-header { background: #f6f8fa; border-bottom: 1px solid #e2e8f0; font-weight: 600; }
+    .modal-footer { border-top: 1px solid #e2e8f0; }
+    .form-control:focus { border-color: #4299e1; box-shadow: 0 0 0 2px #bee3f8; }
+    .btn-success, .btn-primary, .btn-danger, .btn-secondary { border-radius: 4px; font-weight: 500; }
+    .btn-link { color: #4299e1; }
+    .btn-link:hover { color: #3182ce; text-decoration: none; }
+    [aria-label] { outline: none; }
   </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -268,11 +295,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="modal-body">
             <div class="form-group form-required">
               <label for="scheduleName">Schedule Name</label>
-              <input type="text" class="form-control" id="scheduleName" name="scheduleName" required>
+              <input type="text" class="form-control" id="scheduleName" name="scheduleName" required placeholder="Enter schedule name">
             </div>
             <div class="form-group">
               <label for="scheduleDesc">Description</label>
-              <textarea class="form-control" id="scheduleDesc" name="scheduleDesc"></textarea>
+              <textarea class="form-control" id="scheduleDesc" name="scheduleDesc" placeholder="Enter schedule description"></textarea>
             </div>
           </div>
           <div class="modal-footer">
@@ -302,7 +329,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <select class="form-control" id="itemCode" name="itemCode" required>
                 <option value="">-- Select Item --</option>
                 <?php
-                $items = $conn->query("SELECT itemCode, itemName FROM inventoryitem");
+                $items = $conn->query("SELECT itemCode, itemName FROM inventoryitem WHERE itemCategory = 'equipment'");
                 while ($i = $items->fetch_assoc()): ?>
                   <option value="<?= $i['itemCode'] ?>"><?= htmlspecialchars($i['itemName']) ?></option>
                 <?php endwhile; ?>
@@ -345,11 +372,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="hidden" id="addRecordMaintainedItemID" name="maintainedItemID">
             <div class="form-group form-required">
               <label for="maintenanceDate">Maintenance Date</label>
-              <input type="date" class="form-control" id="maintenanceDate" name="maintenanceDate" required>
+              <input type="date" class="form-control" id="maintenanceDate" name="maintenanceDate" required placeholder="Enter maintenance date">
             </div>
             <div class="form-group form-required">
               <label for="itemCondition">Item Condition</label>
               <select class="form-control" id="itemCondition" name="itemCondition" required>
+                <option value="" disabled selected>--Select item condition--</option>
                 <option value="OK">OK</option>
                 <option value="Needs Repair">Needs Repair</option>
                 <option value="Replace Soon">Replace Soon</option>
@@ -357,7 +385,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="form-group">
               <label for="remarks">Remarks</label>
-              <textarea class="form-control" id="remarks" name="remarks"></textarea>
+              <textarea class="form-control" id="remarks" name="remarks" placeholder="Enter remarks"></textarea>
             </div>
             <div class="form-group">
               <label for="attachment">Attachment</label>
@@ -446,6 +474,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 let scheduleTable;
 let currentMatrixWeekDate = null;
 let lastViewedScheduleID = null;
+let isEditMode = false;
 
 // Global functions that can be called from HTML onclick attributes
 function openAddScheduleModal() {
@@ -490,7 +519,7 @@ function loadSchedules() {
           <td>${sch.createdAt}</td>
           <td>${sch.scheduleDesc}</td>
           <td>
-            <button class="action-btn" onclick="openViewScheduleModal('${sch.scheduleID}')"><i class="fas fa-eye"></i></button>
+            <button class="action-btn" onclick="openViewScheduleModal('${sch.scheduleID}')" title="View" aria-label="View"><i class="fas fa-eye"></i></button>
           </td>
         </tr>`;
       });
@@ -515,15 +544,14 @@ function loadSchedules() {
   });
 }
 
-function openViewScheduleModal(scheduleID, weekDate) {
+function openViewScheduleModal(scheduleID, weekDate, editMode = false) {
+  isEditMode = editMode;
   if (!weekDate) {
     currentMatrixWeekDate = new Date();
   } else {
     currentMatrixWeekDate = new Date(weekDate);
   }
-  // Format weekOf as YYYY-MM-DD
   const weekOf = currentMatrixWeekDate.toISOString().slice(0, 10);
-  // Find the schedule data from the last AJAX call (or fetch again)
   $.ajax({
     url: 'maintenance_data.php',
     type: 'GET',
@@ -531,7 +559,21 @@ function openViewScheduleModal(scheduleID, weekDate) {
     success: function(data) {
       const sch = data.find(s => s.scheduleID === scheduleID);
       if (!sch) return;
-      $('#viewScheduleTitle').text(`Schedule: ${sch.scheduleName}`);
+      // Modal title
+      $('#viewScheduleTitle').html(`
+        <div class='d-flex justify-content-between align-items-center w-100' style='gap: 10px;'>
+          <span>${editMode ? `<input type='text' id='editScheduleName' value='${sch.scheduleName.replace(/'/g, "&#39;")}' class='form-control form-control-sm border-0 font-weight-bold' style='font-size:1.2rem; background:transparent; box-shadow:none; width:auto; display:inline-block; min-width:120px;' />` : `<span class='font-weight-bold' style='font-size:1.2rem;'>${sch.scheduleName}</span>`}</span>
+          <span>
+            ${!editMode ? `<button class='btn btn-link p-0' id='editScheduleBtn' title='Edit' aria-label='Edit'><i class='fas fa-edit fa-lg text-primary'></i></button>` : ''}
+          </span>
+        </div>
+      `);
+      // In edit mode, subtle header background and group Save/Cancel
+      if (editMode) {
+        $('.modal-header').css({'background':'#f6f8fa'});
+      } else {
+        $('.modal-header').css({'background':''});
+      }
       // Fetch matrix data for selected week
       $.ajax({
         url: 'maintenance_matrix_data.php',
@@ -542,19 +584,20 @@ function openViewScheduleModal(scheduleID, weekDate) {
           let html = `<div><strong>Schedule ID:</strong> ${sch.scheduleID}<br>
             <strong>Created By:</strong> ${sch.createdByName}<br>
             <strong>Created At:</strong> ${sch.createdAt}<br>
-            <strong>Description:</strong> ${sch.scheduleDesc || ''}
-            <hr>
+            <strong>Description:</strong> ${editMode ? `<textarea id='editScheduleDesc' class='form-control form-control-sm border' style='display:inline-block;width:100%;min-height:32px;resize:none;'>${sch.scheduleDesc || ''}</textarea>` : (sch.scheduleDesc || '')}`;
+          if (editMode) {
+            html += `<div class='mt-2 d-flex gap-2'><button class='btn btn-success btn-sm' id='saveScheduleEditBtn'><i class='fas fa-save'></i> Save</button> <button class='btn btn-secondary btn-sm' id='cancelScheduleEditBtn'><i class='fas fa-times'></i> Cancel</button></div>`;
+          }
+          html += `<hr>
             <div class='d-flex justify-content-between align-items-center mb-2'>
               <h5>Maintenance Matrix (Week of ${matrixData.weekDates[0]})</h5>
               <div>
                 <button class='btn btn-outline-secondary btn-sm mr-2' onclick='changeMatrixWeek(-1, "${scheduleID}")'>&lt; Previous Week</button>
                 <button class='btn btn-outline-secondary btn-sm' onclick='changeMatrixWeek(1, "${scheduleID}")'>Next Week &gt;</button>
-                <button class='btn btn-success btn-sm ml-2' onclick="openAddItemModal('${sch.scheduleID}')"><i class='fas fa-plus'></i> Add Item</button>
+                ${editMode ? `<button class='btn btn-success btn-sm ml-2' onclick="openAddItemModal('${sch.scheduleID}')"><i class='fas fa-plus'></i> Add Item</button>` : ''}
               </div>
             </div>`;
-          // Render matrix table
-          html += `<div class='table-responsive'><table class='table table-bordered table-sm mb-2'>`;
-          // Table header: days
+          html += `<div class='table-responsive'><table class='table table-bordered table-sm mb-2' style='background:#fff;'>`;
           const today = new Date();
           const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
           html += `<thead><tr><th>Item Name</th>`;
@@ -563,13 +606,14 @@ function openViewScheduleModal(scheduleID, weekDate) {
             const isToday = date === todayStr;
             html += `<th${isToday ? ' class="today-col"' : ''}>${d.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: '2-digit' })}</th>`;
           });
+          if (editMode) html += `<th style='width:40px;'>Action</th>`;
           html += `</tr></thead><tbody>`;
-          // Table body: items x days
           if (matrixData.items.length === 0) {
-            html += `<tr><td colspan='8'>No items in this schedule.</td></tr>`;
+            html += `<tr><td colspan='${8 + (editMode ? 1 : 0)}' class='text-center text-muted'>No items in this schedule.</td></tr>`;
           } else {
             matrixData.items.forEach(item => {
-              html += `<tr><td>${item.itemName}</td>`;
+              html += `<tr style='vertical-align:middle;'>`;
+              html += `<td>${item.itemName}</td>`;
               item.matrix.forEach((cell, idx) => {
                 const dayChar = item.daysOfWeek ? item.daysOfWeek[idx] : '-';
                 const isToday = matrixData.weekDates[idx] === todayStr;
@@ -582,6 +626,7 @@ function openViewScheduleModal(scheduleID, weekDate) {
                   html += `<td${tdClass}></td>`;
                 }
               });
+              if (editMode) html += `<td class='text-center'><button class='btn btn-link p-0 remove-item-btn' data-maintained-item-id='${item.maintainedItemID}' title='Remove' aria-label='Remove'><i class='fas fa-trash-alt text-danger'></i></button></td>`;
               html += `</tr>`;
             });
           }
@@ -590,6 +635,75 @@ function openViewScheduleModal(scheduleID, weekDate) {
           html += `<div class='mt-3'><button class='btn btn-secondary btn-sm' onclick="openPastLogsModal('${sch.scheduleID}')"><i class='fas fa-history'></i> View Past Logs</button></div>`;
           $('#viewScheduleBody').html(html);
           $('#viewScheduleModal').modal('show');
+
+          // Edit button handler
+          if (!editMode) {
+            $('#editScheduleBtn').off('click').on('click', function() {
+              openViewScheduleModal(scheduleID, currentMatrixWeekDate, true);
+            });
+          } else {
+            // Save/Cancel handlers
+            $('#saveScheduleEditBtn').off('click').on('click', function() {
+              const newName = $('#editScheduleName').val();
+              const newDesc = $('#editScheduleDesc').val();
+              $.ajax({
+                url: '',
+                type: 'POST',
+                data: {
+                  action: 'update_schedule',
+                  scheduleID: scheduleID,
+                  scheduleName: newName,
+                  scheduleDesc: newDesc
+                },
+                dataType: 'json',
+                success: function(res) {
+                  if (res.success) {
+                    Swal.fire('Success', 'Schedule updated!', 'success');
+                    openViewScheduleModal(scheduleID, currentMatrixWeekDate, false);
+                    loadSchedules();
+                  } else {
+                    Swal.fire('Error', 'Failed to update schedule.', 'error');
+                  }
+                }
+              });
+            });
+            $('#cancelScheduleEditBtn').off('click').on('click', function() {
+              openViewScheduleModal(scheduleID, currentMatrixWeekDate, false);
+            });
+            // Remove item handler
+            $('.remove-item-btn').off('click').on('click', function() {
+              const maintainedItemID = $(this).data('maintained-item-id');
+              Swal.fire({
+                title: 'Remove Item',
+                text: 'Are you sure you want to remove this item from the schedule?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, remove it!',
+                cancelButtonText: 'Cancel'
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  $.ajax({
+                    url: '',
+                    type: 'POST',
+                    data: {
+                      action: 'remove_item',
+                      maintainedItemID: maintainedItemID
+                    },
+                    dataType: 'json',
+                    success: function(res) {
+                      if (res.success) {
+                        Swal.fire('Success', 'Item removed!', 'success');
+                        openViewScheduleModal(scheduleID, currentMatrixWeekDate, true);
+                        loadSchedules();
+                      } else {
+                        Swal.fire('Error', 'Failed to remove item.', 'error');
+                      }
+                    }
+                  });
+                }
+              });
+            });
+          }
         }
       });
     }
