@@ -191,7 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
   <?php include("../navbar/managernavbar.php"); ?>
-  <?php include("../sidebar/managersidebar.php"); ?>
+  <?php include("../sidebar/staffsidebar.php"); ?>
   <div class="content-wrapper">
     <section class="content-header">
       <div class="container-fluid">
