@@ -228,6 +228,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .btn-link { color: #4299e1; }
     .btn-link:hover { color: #3182ce; text-decoration: none; }
     [aria-label] { outline: none; }
+    .view-btn-green {
+      background-color: #28a745;
+      color: #fff;
+      border: 2px solid #000;
+      border-radius: 6px;
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      padding: 0;
+      font-size: 1.1rem;
+      box-shadow: none;
+    }
+    .view-btn-green:hover, .view-btn-green:focus {
+      background-color: #218838;
+      color: #fff;
+      outline: none;
+    }
+    .view-btn-green i { color: #fff; }
   </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -519,7 +540,7 @@ function loadSchedules() {
           <td>${sch.createdAt}</td>
           <td>${sch.scheduleDesc}</td>
           <td>
-            <button class="action-btn" onclick="openViewScheduleModal('${sch.scheduleID}')" title="View" aria-label="View"><i class="fas fa-eye"></i></button>
+            <button class="view-btn-green" onclick="openViewScheduleModal('${sch.scheduleID}')\" title="View" aria-label="View"><i class="fas fa-eye"></i></button>
           </td>
         </tr>`;
       });
