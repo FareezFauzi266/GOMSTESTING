@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Add new staff member
         $userName = $conn->real_escape_string($_POST['userName']);
         $userEmail = $conn->real_escape_string($_POST['userEmail']);
-        $password = password_hash($conn->real_escape_string($_POST['password']), PASSWORD_DEFAULT);
+        $password = $conn->real_escape_string($_POST['password']);
         
         $sql = "INSERT INTO users (userName, userEmail, userPassword, userRole) 
                 VALUES ('$userName', '$userEmail', '$password', 'Staff')";
