@@ -410,7 +410,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="form-group">
               <label for="attachment">Attachment</label>
-              <input type="file" class="form-control" id="attachment" name="attachment" accept="image/*,application/pdf">
+              <input type="file" class="form-control" id="attachment" name="attachment" accept="image/png, image/jpeg, image/jpg">
             </div>
           </div>
           <div class="modal-footer">
@@ -752,12 +752,12 @@ function openViewRecordModal(recordID) {
       html += `<tr><th>Remarks</th><td>${rec.remarks || ''}</td></tr>`;
       if (rec.attachmentPath) {
         const ext = rec.attachmentPath.split('.').pop().toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
-          html += `<tr><th>Attachment</th><td><img src="${rec.attachmentPath}" class="img-fluid" style="max-width: 300px;"></td></tr>`;
-        } else if (ext === 'pdf') {
-          html += `<tr><th>Attachment</th><td><embed src="${rec.attachmentPath}" width="100%" height="400px"></td></tr>`;
-        } else {
-          html += `<tr><th>Attachment</th><td><a href="${rec.attachmentPath}" target="_blank">View Attachment</a></td></tr>`;
+        if (["jpg", "jpeg", "png"].includes(ext)) {
+          let path = rec.attachmentPath;
+          if (!path.startsWith('/GOMS/')) {
+            path = '/GOMS' + path;
+          }
+          html += `<tr><th>Attachment</th><td><img src="${path}" class="img-fluid" style="max-width: 300px;"></td></tr>`;
         }
       }
       html += `</table>`;
