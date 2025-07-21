@@ -11,7 +11,7 @@ if (!isset($_SESSION['userID'])) {
 
 $userID = $_SESSION['userID'];
 
-include("../connection/db2.php");// Include DB first
+include("../connection/db2.php");
 include("../header&footer/settings.php");
 
 $currentPage = 'profile';
@@ -132,7 +132,7 @@ if (!$user) {
       <?php include("../navbar/managernavbar.php"); ?>
       <!-- /.navbar -->
       <!-- Sidebar -->
-      <?php include("../sidebar/managersidebar.php"); ?>
+      <?php include("../sidebar/staffsidebar.php"); ?>
       <!-- /.sidebar -->
 
         <!-- Content Wrapper. Contains page content -->
@@ -142,7 +142,7 @@ if (!$user) {
             <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                <h1>Manager Profile</h1>
+                <h1>Staff Profile</h1>
                 </div>
                 <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
@@ -163,7 +163,7 @@ if (!$user) {
                 <!-- Profile box -->
                 <div class="card">
                     <div class="card-header">
-                    <h3 class="card-title">Manager Details</h3>
+                    <h3 class="card-title">Staff Details</h3>
                     </div>
                     <div class="card-body">
                      <div class="row">
@@ -181,7 +181,7 @@ if (!$user) {
                         <!-- Profile Overview Section -->
                         <div id="profileOverviewSection" class="card shadow-sm">
                           <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Manager Info</h5>
+                            <h5 class="mb-0">Staff Info</h5>
                             <button class="btn btn-primary btn-sm" onclick="openEditProfileModal()">
                               <i class="fas fa-edit mr-1"></i> Edit Profile
                             </button>

@@ -176,7 +176,7 @@ $suppliers = getSuppliers($conn);
     <?php include("../navbar/managernavbar.php"); ?>
     <!-- /.navbar -->
     <!-- Sidebar -->
-    <?php include("../sidebar/managersidebar.php"); ?>
+    <?php include("../sidebar/staffsidebar.php"); ?>
     <!-- /.sidebar -->
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
