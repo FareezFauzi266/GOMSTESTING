@@ -4,9 +4,8 @@ header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
 
-// Redirect if not manager or not logged in
 if (!isset($_SESSION['userID']) || $_SESSION['userRole'] !== 'Manager') {
-    header("Location: /GOMS/index.php");
+    header("Location: /GOMSTESTING/index.php");
     exit;
 }
 
@@ -19,10 +18,10 @@ $currentPage = 'staff';
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add_staff'])) {
-        // Add new staff member
+        // Add new staff member - storing password as plain text
         $userName = $conn->real_escape_string($_POST['userName']);
         $userEmail = $conn->real_escape_string($_POST['userEmail']);
-        $password = password_hash($conn->real_escape_string($_POST['password']), PASSWORD_DEFAULT);
+        $password = $conn->real_escape_string($_POST['password']);
         
         $sql = "INSERT INTO users (userName, userEmail, userPassword, userRole) 
                 VALUES ('$userName', '$userEmail', '$password', 'Staff')";

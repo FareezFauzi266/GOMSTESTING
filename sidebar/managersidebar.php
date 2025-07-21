@@ -74,7 +74,7 @@
 
                 <!-- Staff Management -->
                 <li class="nav-item">
-                    <a href="staff.php" class="nav-link <?php if($currentPage == 'staff') echo 'active'; ?>">
+                    <a href="../manager/staff.php" class="nav-link <?php if($currentPage == 'staff') echo 'active'; ?>">
                         <i class="nav-icon fas fa-users"></i>
                         <p>Staff Management</p>
                     </a>
