@@ -204,9 +204,9 @@ $suppliers = getSuppliers($conn);
             <div class="card-body">
               <div class="inventory-header">
                 <h2 class="inventory-title">Inventory Records</h2>
-                <button class="add-item-btn" onclick="openAddModal()">
+                <!--<button class="add-item-btn" onclick="openAddModal()">
                   <i class="fas fa-plus"></i> Add Item
-                </button>
+                </button> -->
               </div>
               
               <table id="inventoryTable" class="table table-bordered table-hover">
@@ -237,9 +237,9 @@ $suppliers = getSuppliers($conn);
                         <i class="fas fa-pencil-alt"></i>
                       </button>
 
-                      <button class="action-btn delete-btn" onclick="deleteEntry('<?= $item['itemCode'] ?>')">
+                      <!--<button class="action-btn delete-btn" onclick="deleteEntry('<?= $item['itemCode'] ?>')">
                         <i class="fas fa-trash"></i>
-                      </button>
+                      </button> -->
                     </td>
                   </tr>
                   <?php endforeach; ?>
@@ -609,29 +609,29 @@ $(document).ready(function() {
     }
 
     // Function to delete inventory item
-    function deleteInventoryItem(itemCode) {
-        return new Promise((resolve, reject) => {
-            $.ajax({
-                url: window.location.href,
-                type: 'POST',
-                data: {
-                    ajax: true,
-                    action: 'delete_item',
-                    itemCode: itemCode
-                },
-                success: function(response) {
-                    if (response.success) {
-                        resolve();
-                    } else {
-                        reject(response.message || 'Failed to delete item');
-                    }
-                },
-                error: function() {
-                    reject('Error communicating with server');
-                }
-            });
-        });
-    }
+    //function deleteInventoryItem(itemCode) {
+    //    return new Promise((resolve, reject) => {
+    //        $.ajax({
+    //            url: window.location.href,
+    //            type: 'POST',
+    //           data: {
+    //                ajax: true,
+    //               action: 'delete_item',
+    //               itemCode: itemCode
+    //           },
+    //           success: function(response) {
+    //               if (response.success) {
+     //                   resolve();
+    //                } else {
+    //                    reject(response.message || 'Failed to delete item');
+    //                }
+    //            },
+    //            error: function() {
+    //                reject('Error communicating with server');
+    //            }
+    //        });
+    //    });
+    //}
 
     // Open add modal
     async function openAddModal() {
@@ -697,43 +697,43 @@ $(document).ready(function() {
       }
 
       // Delete entry
-      function deleteEntry(itemCode) {
-          Swal.fire({
-              title: 'Delete Inventory Item?',
-              html: `Are you sure you want to delete <strong>${itemCode}</strong>?`,
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonColor: '#d33',
-              cancelButtonColor: '#3085d6',
-              confirmButtonText: 'Yes, delete it!',
-              cancelButtonText: 'Cancel'
-          }).then(async (result) => {
-              if (result.isConfirmed) {
-                  try {
-                      await deleteInventoryItem(itemCode);
+      //function deleteEntry(itemCode) {
+      //    Swal.fire({
+      //        title: 'Delete Inventory Item?',
+      //        html: `Are you sure you want to delete <strong>${itemCode}</strong>?`,
+      //        icon: 'warning',
+      //        showCancelButton: true,
+      //        confirmButtonColor: '#d33',
+      //        cancelButtonColor: '#3085d6',
+      //        confirmButtonText: 'Yes, delete it!',
+      //        cancelButtonText: 'Cancel'
+      //    }).then(async (result) => {
+      //        if (result.isConfirmed) {
+      //            try {
+      //                await deleteInventoryItem(itemCode);
                       
                       // Remove the row from DataTable
-                      const rowNode = $(`#inventoryTable tbody tr[data-code="${itemCode}"]`);
-                      if (rowNode.length) {
-                          table.row(rowNode).remove().draw();
-                      }
+      //                const rowNode = $(`#inventoryTable tbody tr[data-code="${itemCode}"]`);
+      //                if (rowNode.length) {
+      //                    table.row(rowNode).remove().draw();
+      //                }
                       
-                      Swal.fire(
-                          'Deleted!',
-                          'The inventory item has been deleted.',
-                          'success'
-                      );
-                  } catch (error) {
-                      Swal.fire({
-                          icon: 'error',
-                          title: 'Error',
-                          text: error,
-                          timer: 2000
-                      });
-                  }
-              }
-          });
-      }
+      //                Swal.fire(
+      //                    'Deleted!',
+      //                    'The inventory item has been deleted.',
+      //                    'success'
+      //                );
+      //            } catch (error) {
+      //                Swal.fire({
+      //                    icon: 'error',
+      //                    title: 'Error',
+      //                    text: error,
+      //                    timer: 2000
+      //                });
+      //            }
+      //        }
+      //    });
+      //}
 
       // Save changes
       $('#saveChangesBtn').click(async function() {
@@ -857,9 +857,7 @@ $(document).ready(function() {
                           <button class="action-btn edit-btn" onclick="editEntry('${itemCode}')">
                               <i class="fas fa-pencil-alt"></i>
                           </button>
-                          <button class="action-btn delete-btn" onclick="deleteEntry('${itemCode}')">
-                              <i class="fas fa-trash"></i>
-                          </button>
+                          
                       `
                   ]).draw();
                   
@@ -892,7 +890,7 @@ $(document).ready(function() {
       window.toggleNewSupplier = toggleNewSupplier;
       window.openAddModal = openAddModal;
       window.editEntry = editEntry;
-      window.deleteEntry = deleteEntry;
+      //window.deleteEntry = deleteEntry;
   });
   </script>
 </body>

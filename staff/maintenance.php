@@ -4,58 +4,13 @@ header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
 if (!isset($_SESSION['userID'])) {
-    header("Location: /gomstesting/GOMSTESTING/index.php");
+    header("Location: ../index.php");
     exit;
 }
 include("../header&footer/settings.php");
 include("../db.php");
 $currentPage = 'maintenance';
-
-// Helper function to generate next formatted ID
-function getNextFormattedId($conn, $table, $col, $prefix, $pad = 3) {
-    $result = $conn->query("SELECT $col FROM $table WHERE $col LIKE '$prefix%' ORDER BY $col DESC LIMIT 1");
-    if ($row = $result->fetch_assoc()) {
-        $num = intval(substr($row[$col], strlen($prefix))) + 1;
-    } else {
-        $num = 1;
-    }
-    return $prefix . str_pad($num, $pad, '0', STR_PAD_LEFT);
-}
-
-// Handle AJAX requests
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json');
-    $response = ['success' => false];
-
-    $action = $_POST['action'] ?? $_GET['action'] ?? '';
-    switch ($action) {
-        case 'log_maintenance':
-            $rid = getNextFormattedId($conn, 'maintenancerecord', 'recordID', 'R');
-            $attachmentPath = null;
-            if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
-                $uploadDir = '../uploads/maintenance/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-                $ext = pathinfo($_FILES['attachment']['name'], PATHINFO_EXTENSION);
-                $filename = 'ATT_' . $rid . ($ext ? ('.' . strtolower($ext)) : '');
-                $targetPath = $uploadDir . $filename;
-                if (move_uploaded_file($_FILES['attachment']['tmp_name'], $targetPath)) {
-                    $attachmentPath = '/uploads/maintenance/' . $filename;
-                }
-            } else if (isset($_POST['attachmentPath'])) {
-                $attachmentPath = $_POST['attachmentPath'];
-            }
-            $stmt = $conn->prepare("INSERT INTO maintenancerecord (recordID, maintainedItemID, userID, maintenanceDate, itemCondition, remarks, attachmentPath) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssissss", $rid, $_POST['maintainedItemID'], $_SESSION['userID'], $_POST['maintenanceDate'], $_POST['itemCondition'], $_POST['remarks'], $attachmentPath);
-            $response['success'] = $stmt->execute();
-            break;
-    }
-    echo json_encode($response);
-    exit;
-}
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -63,134 +18,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <title><?php browsertitle(); ?></title>
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"/>
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="../app/plugins/fontawesome-free/css/all.min.css"/>
-  <!-- DataTables -->
   <link rel="stylesheet" href="../app/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
   <link rel="stylesheet" href="../app/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
-  <!-- SweetAlert2 -->
   <link rel="stylesheet" href="../app/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
-  <!-- overlayScrollbars -->
   <link rel="stylesheet" href="../app/plugins/overlayScrollbars/css/OverlayScrollbars.min.css"/>
-  <!-- Theme style -->
   <link rel="stylesheet" href="../app/dist/css/adminlte.min.css" />
   <style>
-    .content-wrapper {
-      background-color: #f8fafc;
+    body, .content-wrapper, .main-header, .main-sidebar, .main-footer {
+      font-family: 'Source Sans Pro', Arial, sans-serif !important;
     }
-    .maintenance-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding: 0 10px;
-    }
-    .maintenance-title {
-      color: #2d3748;
-      font-size: 1.8rem;
-      font-weight: 600;
-    }
-    .add-btn {
+    .content-wrapper { background-color: #f8fafc; }
+    .maintenance-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px; }
+    .maintenance-title { color: #2d3748; font-size: 1.8rem; font-weight: 600; }
+    table.dataTable tbody tr:hover { background-color: #ebf8ff !important; }
+    .modal-content { border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+    .modal-header { font-size: 1.25rem; font-weight: 600; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; }
+    .modal-body { padding: 20px; }
+    .modal-footer { border-top: 1px solid #e2e8f0; padding: 16px 20px; }
+    .form-required label:after { content: " *"; color: #e53e3e; }
+    .nested-table { background: #f8f9fa; margin: 0 0 20px 0; border-radius: 8px; padding: 10px; }
+    .today-col { background: #ffe082 !important; font-weight: bold; }
+    .table-bordered tbody tr:hover { background: #f3f6fa !important; }
+    .table-bordered td, .table-bordered th { vertical-align: middle; }
+    .modal-lg { max-width: 800px; }
+    .table-bordered th, .table-bordered td { text-align: center; }
+    .table-striped tbody tr:nth-of-type(odd) { background-color: #f9fafb; }
+    .table-hover tbody tr:hover { background: #f3f6fa !important; }
+    .table-bordered th, .table-bordered td { text-align: center; vertical-align: middle; font-size: 1rem; }
+    .modal-content { border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+    .modal-header { background: #f6f8fa; border-bottom: 1px solid #e2e8f0; font-weight: 600; }
+    .modal-footer { border-top: 1px solid #e2e8f0; }
+    .form-control:focus { border-color: #4299e1; box-shadow: 0 0 0 2px #bee3f8; }
+    .btn-success, .btn-primary, .btn-danger, .btn-secondary { border-radius: 4px; font-weight: 500; }
+    .btn-link { color: #4299e1; }
+    .btn-link:hover { color: #3182ce; text-decoration: none; }
+    [aria-label] { outline: none; }
+    .view-btn-green {
       background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .add-btn:hover {
-      background-color: #218838;
-    }
-    .action-btn {
+      color: #fff;
+      border: 2px solid #000;
+      border-radius: 6px;
+      width: 34px;
+      height: 34px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 30px;
-      height: 30px;
-      border-radius: 4px;
-      cursor: pointer;
-      margin: 0 2px;
+      transition: background 0.2s;
+      padding: 0;
+      font-size: 1.1rem;
+      box-shadow: none;
     }
-    .edit-btn {
-      background-color: #4299e1;
-      color: white;
-    }
-    .edit-btn:hover {
-      background-color: #3182ce;
-    }
-    .delete-btn {
-      background-color: #f56565;
-      color: white;
-    }
-    .delete-btn:hover {
-      background-color: #e53e3e;
-    }
-    table.dataTable tbody tr:hover {
-      background-color: #ebf8ff !important;
-    }
-    .modal-content {
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .modal-header {
-      font-size: 1.25rem;
-      font-weight: 600;
-      padding: 16px 20px;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    .modal-body {
-      padding: 20px;
-    }
-    .modal-footer {
-      border-top: 1px solid #e2e8f0;
-      padding: 16px 20px;
-    }
-    .form-required label:after {
-      content: " *";
-      color: #e53e3e;
-    }
-    .nested-table {
-      background: #f8f9fa;
-      margin: 0 0 20px 0;
-      border-radius: 8px;
-      padding: 10px;
-    }
-    .day-circle {
-      display: inline-block;
-      margin: 0 4px;
-      font-weight: bold;
-    }
-    .day-circle input[type="checkbox"] {
-      display: none;
-    }
-    .day-circle span {
-      background: #e0e0e0;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      display: inline-block;
-      text-align: center;
-      line-height: 40px;
-      font-size: 1.2em;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-    }
-    .day-circle input[type="checkbox"]:checked + span {
-      background: #28a745;
+    .view-btn-green:hover, .view-btn-green:focus {
+      background-color: #218838;
       color: #fff;
+      outline: none;
     }
-    .today-col {
-      background: #ffe082 !important;
-      font-weight: bold;
-    }
+    .view-btn-green i { color: #fff; }
   </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
-  <?php include("../navbar/managernavbar.php"); ?>
+  <?php include("../navbar/staffnavbar.php"); ?>
   <?php include("../sidebar/staffsidebar.php"); ?>
   <div class="content-wrapper">
     <section class="content-header">
@@ -250,11 +139,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="hidden" id="addRecordMaintainedItemID" name="maintainedItemID">
             <div class="form-group form-required">
               <label for="maintenanceDate">Maintenance Date</label>
-              <input type="date" class="form-control" id="maintenanceDate" name="maintenanceDate" required>
+              <input type="date" class="form-control" id="maintenanceDate" name="maintenanceDate" required placeholder="Enter maintenance date">
             </div>
             <div class="form-group form-required">
               <label for="itemCondition">Item Condition</label>
               <select class="form-control" id="itemCondition" name="itemCondition" required>
+                <option value="" disabled selected>--Select item condition--</option>
                 <option value="OK">OK</option>
                 <option value="Needs Repair">Needs Repair</option>
                 <option value="Replace Soon">Replace Soon</option>
@@ -262,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="form-group">
               <label for="remarks">Remarks</label>
-              <textarea class="form-control" id="remarks" name="remarks"></textarea>
+              <textarea class="form-control" id="remarks" name="remarks" placeholder="Enter remarks"></textarea>
             </div>
             <div class="form-group">
               <label for="attachment">Attachment</label>
@@ -277,8 +167,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
     </div>
   </div>
-
-  <!-- Add this after the other modals -->
   <div class="modal fade" id="viewScheduleModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
@@ -294,8 +182,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
     </div>
   </div>
-
-  <!-- Add this after the other modals -->
   <div class="modal fade" id="pastLogsModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
@@ -311,8 +197,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
     </div>
   </div>
-
-  <!-- Add this after the other modals -->
   <div class="modal fade" id="viewRecordModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -328,14 +212,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
     </div>
   </div>
-
   <footer class="main-footer">
     <div class="float-right d-none d-sm-block"></div>
     <strong> <?php copyright(); ?> </strong>
   </footer>
 </div>
-
-<!-- JS dependencies -->
 <script src="../app/plugins/jquery/jquery.min.js"></script>
 <script src="../app/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="../app/plugins/datatables/jquery.dataTables.min.js"></script>
@@ -345,43 +226,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script src="../app/plugins/sweetalert2/sweetalert2.min.js"></script>
 <script src="../app/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
 <script src="../app/dist/js/adminlte.min.js"></script>
-
 <script>
-// --- DataTables and AJAX logic ---
 let scheduleTable;
 let currentMatrixWeekDate = null;
 let lastViewedScheduleID = null;
-
-// Global functions that can be called from HTML onclick attributes
-function openAddScheduleModal() {
-  $('#addScheduleForm')[0].reset();
-  $('#addScheduleModal').modal('show');
-}
-
-function openAddItemModal(scheduleID) {
-  // Close the view modal first
-  $('#viewScheduleModal').modal('hide');
-  lastViewedScheduleID = scheduleID;
-  setTimeout(function() {
-    $('#addItemForm')[0].reset();
-    $('#addItemScheduleID').val(scheduleID);
-    $('#addItemModal').modal('show');
-  }, 400); // Wait for modal to close
-}
-
-function openAddRecordModal(maintainedItemID, date) {
-  $('#viewScheduleModal').modal('hide');
-  setTimeout(function() {
-    $('#addRecordForm')[0].reset();
-    $('#addRecordMaintainedItemID').val(maintainedItemID);
-    if (date) $('#maintenanceDate').val(date);
-    $('#addRecordModal').modal('show');
-  }, 400);
-}
-
 function loadSchedules() {
   $.ajax({
-    url: 'maintenance_data.php',
+    url: '../manager/maintenance_data.php',
     type: 'GET',
     dataType: 'json',
     success: function(data) {
@@ -395,7 +246,7 @@ function loadSchedules() {
           <td>${sch.createdAt}</td>
           <td>${sch.scheduleDesc}</td>
           <td>
-            <button class="action-btn" onclick="openViewScheduleModal('${sch.scheduleID}')"><i class="fas fa-eye"></i></button>
+            <button class="view-btn-green" onclick="openViewScheduleModal('${sch.scheduleID}')" title="View" aria-label="View"><i class="fas fa-eye"></i></button>
           </td>
         </tr>`;
       });
@@ -419,27 +270,23 @@ function loadSchedules() {
     }
   });
 }
-
 function openViewScheduleModal(scheduleID, weekDate) {
   if (!weekDate) {
     currentMatrixWeekDate = new Date();
   } else {
     currentMatrixWeekDate = new Date(weekDate);
   }
-  // Format weekOf as YYYY-MM-DD
   const weekOf = currentMatrixWeekDate.toISOString().slice(0, 10);
-  // Find the schedule data from the last AJAX call (or fetch again)
   $.ajax({
-    url: 'maintenance_data.php',
+    url: '../manager/maintenance_data.php',
     type: 'GET',
     dataType: 'json',
     success: function(data) {
       const sch = data.find(s => s.scheduleID === scheduleID);
       if (!sch) return;
-      $('#viewScheduleTitle').text(`Schedule: ${sch.scheduleName}`);
-      // Fetch matrix data for selected week
+      $('#viewScheduleTitle').html(`<span class='font-weight-bold' style='font-size:1.2rem;'>${sch.scheduleName}</span>`);
       $.ajax({
-        url: 'maintenance_matrix_data.php',
+        url: '../manager/maintenance_matrix_data.php',
         type: 'GET',
         data: { scheduleID: scheduleID, weekOf: weekOf },
         dataType: 'json',
@@ -447,8 +294,8 @@ function openViewScheduleModal(scheduleID, weekDate) {
           let html = `<div><strong>Schedule ID:</strong> ${sch.scheduleID}<br>
             <strong>Created By:</strong> ${sch.createdByName}<br>
             <strong>Created At:</strong> ${sch.createdAt}<br>
-            <strong>Description:</strong> ${sch.scheduleDesc || ''}
-            <hr>
+            <strong>Description:</strong> ${(sch.scheduleDesc || '')}`;
+          html += `<hr>
             <div class='d-flex justify-content-between align-items-center mb-2'>
               <h5>Maintenance Matrix (Week of ${matrixData.weekDates[0]})</h5>
               <div>
@@ -456,9 +303,7 @@ function openViewScheduleModal(scheduleID, weekDate) {
                 <button class='btn btn-outline-secondary btn-sm' onclick='changeMatrixWeek(1, "${scheduleID}")'>Next Week &gt;</button>
               </div>
             </div>`;
-          // Render matrix table
-          html += `<div class='table-responsive'><table class='table table-bordered table-sm mb-2'>`;
-          // Table header: days
+          html += `<div class='table-responsive'><table class='table table-bordered table-sm mb-2' style='background:#fff;'>`;
           const today = new Date();
           const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
           html += `<thead><tr><th>Item Name</th>`;
@@ -468,12 +313,12 @@ function openViewScheduleModal(scheduleID, weekDate) {
             html += `<th${isToday ? ' class="today-col"' : ''}>${d.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: '2-digit' })}</th>`;
           });
           html += `</tr></thead><tbody>`;
-          // Table body: items x days
           if (matrixData.items.length === 0) {
-            html += `<tr><td colspan='8'>No items in this schedule.</td></tr>`;
+            html += `<tr><td colspan='8' class='text-center text-muted'>No items in this schedule.</td></tr>`;
           } else {
             matrixData.items.forEach(item => {
-              html += `<tr><td>${item.itemName}</td>`;
+              html += `<tr style='vertical-align:middle;'>`;
+              html += `<td>${item.itemName}</td>`;
               item.matrix.forEach((cell, idx) => {
                 const dayChar = item.daysOfWeek ? item.daysOfWeek[idx] : '-';
                 const isToday = matrixData.weekDates[idx] === todayStr;
@@ -499,16 +344,23 @@ function openViewScheduleModal(scheduleID, weekDate) {
     }
   });
 }
-
 function changeMatrixWeek(offset, scheduleID) {
   if (!currentMatrixWeekDate) currentMatrixWeekDate = new Date();
   currentMatrixWeekDate.setDate(currentMatrixWeekDate.getDate() + offset * 7);
   openViewScheduleModal(scheduleID, currentMatrixWeekDate);
 }
-
+function openAddRecordModal(maintainedItemID, date) {
+  $('#viewScheduleModal').modal('hide');
+  setTimeout(function() {
+    $('#addRecordForm')[0].reset();
+    $('#addRecordMaintainedItemID').val(maintainedItemID);
+    if (date) $('#maintenanceDate').val(date);
+    $('#addRecordModal').modal('show');
+  }, 400);
+}
 function openViewRecordModal(recordID) {
   $.ajax({
-    url: 'maintenance_record_data.php',
+    url: '../manager/maintenance_record_data.php',
     type: 'GET',
     data: { recordID: recordID },
     dataType: 'json',
@@ -535,10 +387,9 @@ function openViewRecordModal(recordID) {
     }
   });
 }
-
 function openPastLogsModal(scheduleID) {
   $.ajax({
-    url: 'maintenance_data.php',
+    url: '../manager/maintenance_data.php',
     type: 'GET',
     dataType: 'json',
     success: function(data) {
@@ -566,19 +417,14 @@ function openPastLogsModal(scheduleID) {
     }
   });
 }
-
-// Document ready function for form handlers and event listeners
 $(document).ready(function() {
-  // Load schedules
   loadSchedules();
-  
-  // Add Record
   $('#addRecordForm').submit(function(e) {
     e.preventDefault();
     var formData = new FormData(this);
     formData.append('action', 'log_maintenance');
     $.ajax({
-      url: '',
+      url: '../manager/maintenance.php',
       type: 'POST',
       data: formData,
       processData: false,
@@ -595,17 +441,6 @@ $(document).ready(function() {
       }
     });
   });
-
-  // After adding item or record, re-open the view modal for the same schedule
-  $('#addItemModal').on('hidden.bs.modal', function () {
-    if (lastViewedScheduleID) {
-      setTimeout(function() {
-        openViewScheduleModal(lastViewedScheduleID);
-        lastViewedScheduleID = null;
-      }, 400);
-    }
-  });
-
   $('#addRecordModal').on('hidden.bs.modal', function () {
     if (lastViewedScheduleID) {
       setTimeout(function() {
@@ -616,6 +451,5 @@ $(document).ready(function() {
   });
 });
 </script>
-
 </body>
-</html>
+</html> 
