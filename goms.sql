@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jul 21, 2025 at 01:14 PM
+-- Generation Time: Jul 22, 2025 at 11:06 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -124,7 +124,9 @@ INSERT INTO `maintenanceitem` (`maintainedItemID`, `scheduleID`, `itemCode`, `da
 ('MID002', 'MTB001', 7001, 'MT-HF--'),
 ('MID003', 'MTB002', 7005, 'M-W-F-U'),
 ('MID004', 'MTB002', 7004, 'MTWHFSU'),
-('MID005', 'MTB003', 7007, 'M--H--U');
+('MID005', 'MTB003', 7007, 'M--H--U'),
+('MID006', 'MTB004', 7007, 'MTW----'),
+('MID007', 'MTB005', 7007, 'MTWHFSU');
 
 -- --------------------------------------------------------
 
@@ -155,7 +157,27 @@ INSERT INTO `maintenancerecord` (`recordID`, `maintainedItemID`, `userID`, `main
 ('R006', 'MID002', 2, '2025-07-17', 'OK', 'huhu', '/uploads/maintenance/ATT_R006.png'),
 ('R007', 'MID003', 2, '2025-07-14', 'Needs Repair', 'hehe', '/uploads/maintenance/ATT_R007.png'),
 ('R008', 'MID004', 2, '2025-07-14', 'OK', 'eheh', NULL),
-('R009', 'MID005', 2, '2025-07-14', 'OK', 'hehe', NULL);
+('R009', 'MID005', 2, '2025-07-14', 'OK', 'hehe', NULL),
+('R010', 'MID005', 2, '2025-07-21', 'Needs Repair', 'lalalalal', NULL),
+('R011', 'MID001', 2, '2025-07-21', 'OK', '', '/uploads/maintenance/ATT_R011.heic'),
+('R012', 'MID006', 2, '2025-07-21', 'Needs Repair', 'fsfssf', '/uploads/maintenance/ATT_R012.jpg'),
+('R013', 'MID003', 2, '2025-07-21', 'Replace Soon', 'lalalala', NULL),
+('R014', 'MID006', 2, '2025-07-22', 'Needs Repair', 'Needs repair', NULL),
+('R015', 'MID006', 2, '2025-07-23', 'OK', 'Test gambo', NULL),
+('R016', 'MID006', 2, '2025-07-28', 'OK', 'DEBUG IMAGE', NULL),
+('R017', 'MID006', 2, '2025-07-29', 'OK', 'DEBUG IMG NOT SHOWING 2', NULL),
+('R018', 'MID006', 2, '2025-07-29', 'OK', 'DEBUG IMG NOT SHOWING 2', NULL),
+('R019', 'MID006', 2, '2025-07-29', 'OK', 'DEBUG IMG NOT SHOWING 2', NULL),
+('R020', 'MID006', 2, '2025-07-29', 'OK', 'DEBUG IMG NOT SHOWING 2', NULL),
+('R021', 'MID006', 2, '2025-07-29', 'OK', 'DEBUG IMG NOT SHOWING 2', NULL),
+('R022', 'MID006', 2, '2025-07-29', 'OK', 'DEBUG IMG NOT SHOWING 2', NULL),
+('R023', 'MID006', 2, '2025-07-29', 'OK', 'DEBUG IMG NOT SHOWING 2', NULL),
+('R024', 'MID006', 2, '2025-07-29', 'OK', 'DEBUG IMG NOT SHOWING 2', NULL),
+('R025', 'MID006', 2, '2025-07-30', 'OK', 'TEST IMG DEBUG 3', '/uploads/maintenance/ATT_R025.jpg'),
+('R026', 'MID007', 2, '2025-07-22', 'Needs Repair', 'DEBUG 1', '/uploads/maintenance/ATT_R026.jpg'),
+('R027', 'MID007', 2, '2025-07-23', 'OK', 'DEBUG 2', '/uploads/maintenance/ATT_R027.png'),
+('R028', 'MID007', 2, '2025-07-24', 'OK', 'DEBUG 3', '/uploads/maintenance/ATT_R028.jpeg'),
+('R029', 'MID007', 2, '2025-07-25', 'OK', 'DEBUG 4', '/uploads/maintenance/ATT_R029.png');
 
 -- --------------------------------------------------------
 
@@ -178,7 +200,9 @@ CREATE TABLE `maintenanceschedule` (
 INSERT INTO `maintenanceschedule` (`scheduleID`, `scheduleName`, `createdBy`, `createdAt`, `scheduleDesc`) VALUES
 ('MTB001', 'Electrical Items', 2, '2025-07-19', 'Maintenance for Electrical Items'),
 ('MTB002', 'Free weight machines', 2, '2025-07-19', 'Maintenance schedule for free weights item. eg: dumbelss and plates'),
-('MTB003', 'Electrical Items', 3, '2025-07-20', 'sssss');
+('MTB003', 'Electrical Items', 3, '2025-07-20', 'sssss'),
+('MTB004', 'TOLOL', 2, '2025-07-21', 'hehe'),
+('MTB005', 'DEBUG', 2, '2025-07-22', 'DEBUG PURPOSE');
 
 -- --------------------------------------------------------
 

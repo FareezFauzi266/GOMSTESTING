@@ -47,23 +47,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'log_maintenance':
             $rid = getNextFormattedId($conn, 'maintenancerecord', 'recordID', 'R');
             $attachmentPath = null;
+            error_log("UPLOAD DEBUG: " . print_r($_FILES, true));
             if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
                 $uploadDir = '../uploads/maintenance/';
                 if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
+                    if (!mkdir($uploadDir, 0777, true)) {
+                        error_log("UPLOAD ERROR: Failed to create directory $uploadDir");
+                    }
                 }
                 $ext = pathinfo($_FILES['attachment']['name'], PATHINFO_EXTENSION);
                 $filename = 'ATT_' . $rid . ($ext ? ('.' . strtolower($ext)) : '');
                 $targetPath = $uploadDir . $filename;
                 if (move_uploaded_file($_FILES['attachment']['tmp_name'], $targetPath)) {
                     $attachmentPath = '/uploads/maintenance/' . $filename;
+                    error_log("UPLOAD SUCCESS: File moved to $targetPath");
+                } else {
+                    error_log("UPLOAD ERROR: Failed to move uploaded file to $targetPath");
+                    error_log("TMP FILE: " . $_FILES['attachment']['tmp_name']);
+                    error_log("PERMISSIONS: " . substr(sprintf('%o', fileperms($uploadDir)), -4));
                 }
-            } else if (isset($_POST['attachmentPath'])) {
-                $attachmentPath = $_POST['attachmentPath'];
+            } else if (isset($_FILES['attachment'])) {
+                error_log("UPLOAD ERROR: File upload error code: " . $_FILES['attachment']['error']);
             }
             $stmt = $conn->prepare("INSERT INTO maintenancerecord (recordID, maintainedItemID, userID, maintenanceDate, itemCondition, remarks, attachmentPath) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $stmt->bind_param("ssissss", $rid, $_POST['maintainedItemID'], $_SESSION['userID'], $_POST['maintenanceDate'], $_POST['itemCondition'], $_POST['remarks'], $attachmentPath);
-            $response['success'] = $stmt->execute();
+            $execResult = $stmt->execute();
+            if (!$execResult) {
+                error_log("DB ERROR: " . $stmt->error);
+            }
+            $response['success'] = $execResult;
             break;
 
         case 'update_schedule':
@@ -746,6 +758,7 @@ function openViewRecordModal(recordID) {
     success: function(rec) {
       let html = `<table class='table table-bordered'>`;
       html += `<tr><th>Record ID</th><td>${rec.recordID}</td></tr>`;
+      html += `<tr><th>Created By</th><td>${rec.userName}</td></tr>`;
       html += `<tr><th>Item Name</th><td>${rec.itemName}</td></tr>`;
       html += `<tr><th>Maintenance Date</th><td>${rec.maintenanceDate}</td></tr>`;
       html += `<tr><th>Item Condition</th><td>${rec.itemCondition}</td></tr>`;
