@@ -367,6 +367,7 @@ function openViewRecordModal(recordID) {
     success: function(rec) {
       let html = `<table class='table table-bordered'>`;
       html += `<tr><th>Record ID</th><td>${rec.recordID}</td></tr>`;
+      html += `<tr><th>Created By</th><td>${rec.userName}</td></tr>`;
       html += `<tr><th>Item Name</th><td>${rec.itemName}</td></tr>`;
       html += `<tr><th>Maintenance Date</th><td>${rec.maintenanceDate}</td></tr>`;
       html += `<tr><th>Item Condition</th><td>${rec.itemCondition}</td></tr>`;
