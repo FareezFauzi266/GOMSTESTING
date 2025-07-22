@@ -31,6 +31,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
   echo json_encode(['success' => $success]);
   exit;
 }
+// AJAX: Delete ledger entry
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'delete') {
+  $data = json_decode(file_get_contents('php://input'), true);
+  $paymentID = $data['paymentID'] ?? null;
+  $success = false;
+  if ($paymentID) {
+    $stmt = $dbh->prepare("DELETE FROM logPayment WHERE paymentID = ?");
+    $success = $stmt->execute([$paymentID]);
+  }
+  header('Content-Type: application/json');
+  echo json_encode(['success' => $success]);
+  exit;
+}
 // Fetch all logPayment records joined with users
 $payments = [];
 try {
@@ -547,12 +560,34 @@ try {
         cancelButtonText: 'Cancel'
       }).then((result) => {
         if (result.isConfirmed) {
-          // You can add AJAX here to delete from DB
-          Swal.fire(
-            'Deleted!',
-            'The ledger entry has been deleted.',
-            'success'
-          );
+          // AJAX call to delete from DB
+          $.ajax({
+            url: 'financialLedger.php?action=delete',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ paymentID }),
+            success: function(response) {
+              if (response.success) {
+                // Remove from local data and DataTable
+                const entryIndex = ledgerData.findIndex(item => item.paymentID === paymentID);
+                if (entryIndex > -1) {
+                  ledgerData.splice(entryIndex, 1);
+                  const table = $('#ledgerTable').DataTable();
+                  table.clear().rows.add(ledgerData).draw();
+                }
+                Swal.fire(
+                  'Deleted!',
+                  'The ledger entry has been deleted.',
+                  'success'
+                );
+              } else {
+                Swal.fire('Error', 'Failed to delete the ledger entry.', 'error');
+              }
+            },
+            error: function(xhr) {
+              Swal.fire('Error', 'An error occurred: ' + xhr.responseText, 'error');
+            }
+          });
         }
       });
     }
